@@ -6,6 +6,7 @@ class App
     protected $controllerName = '';       // Enthält den Namen des zu ladenden Controllers
     protected $actionName = '';           // Enthält den Namen der Methode (Aktion) im Controller
     protected $resourceId = 0;            // Enthält die ID, falls vorhanden (z.B. bei /delete/6)
+    protected $lang = 'de';
 
     public function __construct()
     {
@@ -19,11 +20,17 @@ class App
         $matchedRoute = null;
         foreach ($routes as $routePattern => $routeInfo) {
             $regexPattern = str_replace('/', '\/', $routePattern);
+            
+            $regexPattern = str_replace('{lang}', '([a-z]{2})', $regexPattern);
             $regexPattern = str_replace('{id}', '([0-9]+)', $regexPattern);
-            if (preg_match("/^" . $regexPattern . "$/i", $requestedRoute, $matches)) {
+            if (preg_match_all("/^" . $regexPattern . "$/i", $requestedRoute, $matches)) {
                 $matchedRoute = $routeInfo;
                 if (count($matches) > 1) {
-                    $this->resourceId = $matches[1];
+                    $this->lang = $matches[1][0];
+                    if(array_key_exists(2, $matches)){
+                        $this->resourceId = $matches[2][0];
+                    }
+                    
                 }
                 break;
             }
@@ -43,7 +50,7 @@ class App
 
 		if (class_exists($this->controllerName)) {
 			 $controllerInstance = new $this->controllerName();
-			 call_user_func_array([$controllerInstance, $this->actionName], [$this->resourceId]);
+			 call_user_func_array([$controllerInstance, $this->actionName], [$this->resourceId, $this->lang]);
 		}
     }
 
