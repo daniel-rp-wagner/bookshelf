@@ -14,8 +14,12 @@ class City
         $this->db = new Database();
     }
 
-    // Method to retrieve a book by its ID from the database
-    public function getAllCities()
+    /**
+     * Holt alle Orte (ggf. erweiterbar um Paginierung oder Filter).
+     *
+     * @return array
+     */
+    public function getAllCities($id, $lang)
     {
         // Prepare a SQL query to select a record from the book table by ID
         $this->db->query("SELECT 
@@ -48,15 +52,20 @@ class City
                 AND pcn_display.language_code = :lang
             ORDER BY officialName ASC");
         // Bind the id parameter to the query
-        $this->db->bind(':lang', LANG);
+        $this->db->bind(':lang', $lang);
         // Execute the prepared query
         $this->db->execute();
         // Return the result of the query
         return $this->db->results() ?? [];
     }
 
-    // Method to retrieve a book by its ID from the database
-    public function getCityById($id)
+    /**
+     * Holt einen Ort inklusive aller zugehörigen Daten anhand der ID.
+     *
+     * @param int $id
+     * @return array
+     */
+    public function getCityById($id, $lang)
     {
         // Prepare a SQL query to select a record from the book table by ID
         $this->db->query("SELECT 
@@ -92,11 +101,20 @@ class City
                 AND pcn_display.language_code = :lang
             WHERE c.id = :id;");
         // Bind the id parameter to the query
-        $this->db->bind(':lang', LANG);
+        $this->db->bind(':lang', $lang);
         $this->db->bind(':id', $id);
         // Execute the prepared query
         $this->db->execute();
         // Return the result of the query
         return $this->db->result() ?? [];
+    }
+
+    public function deleteCityById($id)
+    {
+        $this->db->query("DELETE FROM cities c WHERE c.id = :id");
+        $this->db->bind(':id', $id);
+
+        // Execute the prepared query
+        return $this->db->execute();
     }
 }
