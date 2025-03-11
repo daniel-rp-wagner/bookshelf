@@ -19,8 +19,6 @@ define('DB_NAME', 'shelf');
 // Define the database port
 define('DB_PORT', '3306');
 
-define('LANG', 'fr');
-
 // Define the base URL for the application
 define('BASE_URL', 'http://localhost/public/');
 
