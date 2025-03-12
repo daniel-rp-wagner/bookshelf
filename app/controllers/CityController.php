@@ -23,27 +23,8 @@ class CityController extends Controller {
 
     // Beispiel: Aufruf via Route: 'api/city/add'
     public function addNewCity($lang) {
-        // echo "CityController: addNewCity method";
-        $data = array(
-            'id' => 1234567, 
-            'country_iso' => 'DE', 
-            'parent_city_id' => null, 
-            'type' => 'city',
-            'coordinates' => array(
-                'latitude' => 1.1,
-                'longitude' => 2.2
-            ),
-            'names' => array(
-                array(
-                    'name' => 'Stadt1', 
-                    'language_code' => 'on'
-                ),
-                array(
-                    'name' => 'Stadt2', 
-                    'language_code' => 'fr'
-                )
-            )
-        );
+        $data = file_get_contents('php://input');
+        $data = json_decode($data, true);
 
          // Load the Book model
         $cityModel = $this->loadModel("City");
