@@ -96,14 +96,28 @@ class App
         }
 
         if ($matchedRoute !== null) {
-	    $this->size = filter_input(INPUT_GET, 'size', FILTER_VALIDATE_INT) ?? $this->size;
-	    $this->page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT) ?? $this->page;
-            $this->controllerName = $matchedRoute['controller'];
-            $this->actionName = $matchedRoute['method'];
+		// Validiert 'size' als Integer, mit einem Mindestwert von 1 und einem Höchstwert von 100
+		$this->size = filter_input(INPUT_GET, 'size', FILTER_VALIDATE_INT, [
+		    'options' => [
+			'default' => $this->size,  // Fallback-Wert, wenn keine gültige Zahl übergeben wurde
+			'min_range' => 1,
+			'max_range' => 100,
+		    ],
+		]);
+		
+		// Validiert 'page' als Integer, mit einem Mindestwert von 1
+		$this->page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT, [
+		    'options' => [
+			'default' => $this->page,
+			'min_range' => 1,
+		    ],
+		]);
+		$this->controllerName = $matchedRoute['controller'];
+		$this->actionName = $matchedRoute['method'];
         } else {
-            header("HTTP/1.0 404 Not Found");
-            echo "404 - Route not found!";
-            exit;
+		header("HTTP/1.0 404 Not Found");
+		echo "404 - Route not found!";
+		exit;
         }
 
         // Include the controller file
