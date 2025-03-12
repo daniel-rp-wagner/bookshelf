@@ -10,6 +10,12 @@
 class App
 {
     /**
+     * The HTTP request method which is required. Default is GET.
+     *
+     * @var string
+     */
+    protected $method = 'GET';
+    /**
      * The name of the controller to be loaded.
      *
      * @var string
@@ -17,7 +23,7 @@ class App
     protected $controllerName = '';
 
     /**
-     * The name of the action (method) in the controller to be called.
+     * The name of the action in the controller to be called.
      *
      * @var string
      */
@@ -78,20 +84,23 @@ class App
 		
         $matchedRoute = null;
         foreach ($routes as $routePattern => $routeInfo) {
+            $this->method = $_SERVER['REQUEST_METHOD'];
             $regexPattern = str_replace('/', '\/', $routePattern);
             
             $regexPattern = str_replace('{lang}', '([a-z]{2})', $regexPattern);
             $regexPattern = str_replace('{id}', '([0-9]+)', $regexPattern);
             if (preg_match_all("/^" . $regexPattern . "$/i", $requestedRoute, $matches)) {
-                $matchedRoute = $routeInfo;
-                if (count($matches) > 1) {
-                    $this->lang = $matches[1][0];
-                    if(array_key_exists(2, $matches)){
-                        $this->resourceId = $matches[2][0];
+                if($routeInfo['method'] === $this->method){
+                    $matchedRoute = $routeInfo;
+                    if (count($matches) > 1) {
+                        $this->lang = $matches[1][0];
+                        if(array_key_exists(2, $matches)){
+                            $this->resourceId = $matches[2][0];
+                        }
+                        
                     }
-                    
+                    break;
                 }
-                break;
             }
         }
 
@@ -113,7 +122,7 @@ class App
 		    ],
 		]);
 		$this->controllerName = $matchedRoute['controller'];
-		$this->actionName = $matchedRoute['method'];
+		$this->actionName = $matchedRoute['action'];
         } else {
 		header("HTTP/1.0 404 Not Found");
 		echo "404 - Route not found!";
