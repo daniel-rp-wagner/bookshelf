@@ -26,6 +26,7 @@ class City
                 c.id,
                 cn_official.name AS officialName,
                 COALESCE(cn_display.name, cn_official.name) AS displayName,
+                c.country_iso AS countryCode,
                 CASE :lang
                     WHEN 'fr' THEN co.name_fr
                     WHEN 'de' THEN co.name_de
