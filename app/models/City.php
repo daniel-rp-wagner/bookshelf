@@ -120,6 +120,8 @@ class City
 
     public function createCity($data)
     {
+        $this->db->begin();
+
         $this->db->query("INSERT INTO cities (id, country_iso, parent_city_id, type) VALUES (:id, :country_iso, :parent, :type)");
         $this->db->bind(':id', $data['id']);
         $this->db->bind(':country_iso', $data['country_iso']);
@@ -147,6 +149,8 @@ class City
             $this->db->execute();
         }
 
-        return [true];
+        $this->db->commit();
+
+        return [$data['id']];
     }
 }
