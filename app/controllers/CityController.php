@@ -53,8 +53,6 @@ class CityController extends Controller {
 
     // Beispiel: Aufruf via Route: 'api/city/delete/{id}'
     public function deleteCity($resourceId, $lang) {
-        // echo "CityController: deleteCity method - resourceId: " . $resourceId;
-
         // Load the Book model
         $cityModel = $this->loadModel("City");
         // Retrieve the book with the given ID
