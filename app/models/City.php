@@ -117,4 +117,9 @@ class City
         // Execute the prepared query
         return $this->db->execute();
     }
+
+    public function createCity($data)
+    {
+        print_r($data);
+    }
 }
