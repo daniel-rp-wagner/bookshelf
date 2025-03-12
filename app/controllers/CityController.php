@@ -32,8 +32,15 @@ class CityController extends Controller {
     }
 
     // Beispiel: Aufruf via Route: 'api/city/delete/{id}'
-    public function deleteCity($resourceId) {
-        echo "CityController: deleteCity method - resourceId: " . $resourceId;
+    public function deleteCity($resourceId, $lang) {
+        // echo "CityController: deleteCity method - resourceId: " . $resourceId;
+
+        // Load the Book model
+        $cityModel = $this->loadModel("City");
+        // Retrieve the book with the given ID
+        $city = $cityModel->deleteCityById($resourceId, $lang);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($city, JSON_UNESCAPED_UNICODE);
     }
 
     // Beispiel: Aufruf via Route: 'api/city/update/{id}'
