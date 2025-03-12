@@ -1,16 +1,72 @@
 <?php
 
+/**
+ * Class App
+ *
+ * Front Controller for the REST API framework.
+ * This class parses the request URL, matches it to the configured routes,
+ * loads the appropriate controller, and invokes the corresponding action.
+ */
 class App
 {
-    // Standardwerte mit sprechenden Namen
-    protected $controllerName = '';       // Enthält den Namen des zu ladenden Controllers
-    protected $actionName = '';           // Enthält den Namen der Methode (Aktion) im Controller
-    protected $resourceId = 0;            // Enthält die ID, falls vorhanden (z.B. bei /delete/6)
+    /**
+     * The name of the controller to be loaded.
+     *
+     * @var string
+     */
+    protected $controllerName = '';
+
+    /**
+     * The name of the action (method) in the controller to be called.
+     *
+     * @var string
+     */
+    protected $actionName = '';
+
+    /**
+     * The resource ID extracted from the URL (e.g., in /delete/6).
+     *
+     * @var int
+     */
+    protected $resourceId = 0;
+
+    /**
+     * The language parameter, default is 'de'.
+     *
+     * @var string
+     */
     protected $lang = 'de';
+
+    /**
+     * The number of items per page.
+     *
+     * @var int
+     */
     protected $size = 50;
+
+    /**
+     * The current page number.
+     *
+     * @var int
+     */
     protected $page = 1;
+
+    /**
+     * The filter parameter for API queries.
+     *
+     * @var string
+     */
     protected $filter = '';
 
+    /**
+     * App constructor.
+     *
+     * This method initializes the application by parsing the URL,
+     * matching it against the route configuration, and invoking the
+     * appropriate controller and action.
+     *
+     * @return void
+     */
     public function __construct()
     {
         $urlSegments = $this->parseUrl();
@@ -40,14 +96,14 @@ class App
         }
 
         if ($matchedRoute !== null) {
-	    $this->size = $_GET['size'] ?? $this->size;
-	    $this->page = $_GET['page'] ?? $this->page;
+	    $this->size = filter_input(INPUT_GET, 'size', FILTER_VALIDATE_INT) ?? $this->size;
+	    $this->page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT) ?? $this->page;
             $this->controllerName = $matchedRoute['controller'];
             $this->actionName = $matchedRoute['method'];
         } else {
             header("HTTP/1.0 404 Not Found");
             echo "404 - Route not found!";
-            return;
+            exit;
         }
 
         // Include the controller file
@@ -59,7 +115,13 @@ class App
 		}
     }
 
-    // Function to parse the URL and return its components
+    /**
+     * Parses the URL from the GET request.
+     *
+     * Checks if the 'url' parameter is set, sanitizes it, and splits it into segments.
+     *
+     * @return array An array of URL segments.
+     */
     private function parseUrl()
     {
         // Check if the 'url' parameter is set in the GET request (.htaccess configurations will process the url)
