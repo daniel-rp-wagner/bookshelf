@@ -7,6 +7,9 @@ class App
     protected $actionName = '';           // Enthält den Namen der Methode (Aktion) im Controller
     protected $resourceId = 0;            // Enthält die ID, falls vorhanden (z.B. bei /delete/6)
     protected $lang = 'de';
+    protected $size = 50;
+    protected $page = 1;
+    protected $filter = '';
 
     public function __construct()
     {
@@ -37,6 +40,8 @@ class App
         }
 
         if ($matchedRoute !== null) {
+	    $this->size = $_GET['size'] ?? $this->size;
+	    $this->page = $_GET['page'] ?? $this->page;
             $this->controllerName = $matchedRoute['controller'];
             $this->actionName = $matchedRoute['method'];
         } else {
