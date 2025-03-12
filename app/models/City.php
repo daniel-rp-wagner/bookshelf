@@ -19,7 +19,7 @@ class City
      *
      * @return array
      */
-    public function getAllCities($id, $lang)
+    public function getAllCities($lang)
     {
         // Prepare a SQL query to select a record from the book table by ID
         $this->db->query("SELECT 
@@ -111,7 +111,7 @@ class City
 
     public function deleteCityById($id)
     {
-        $this->db->query("DELETE FROM cities c WHERE c.id = :id");
+        $this->db->query("DELETE FROM cities WHERE id = :id");
         $this->db->bind(':id', $id);
 
         // Execute the prepared query
@@ -120,6 +120,33 @@ class City
 
     public function createCity($data)
     {
-        print_r($data);
+        $this->db->query("INSERT INTO cities (id, country_iso, parent_city_id, type) VALUES (:id, :country_iso, :parent, :type)");
+        $this->db->bind(':id', $data['id']);
+        $this->db->bind(':country_iso', $data['country_iso']);
+        $this->db->bind(':parent', $data['parent_city_id']);
+        $this->db->bind(':type', $data['type']);
+
+        // Execute the prepared query
+        $this->db->execute();
+
+        $this->db->query("INSERT INTO city_coordinates (city_id, latitude, longitude) VALUES (:id, :latitude, :longitude)");
+        $this->db->bind(':id', $data['id']);
+        $this->db->bind(':latitude', $data['coordinates']['latitude']);
+        $this->db->bind(':longitude', $data['coordinates']['longitude']);
+
+        // Execute the prepared query
+        $this->db->execute();
+
+        foreach($data['names'] as $names){
+            $this->db->query("INSERT INTO city_names (city_id, language_code, name) VALUES (:id, :language_code, :name)");
+            $this->db->bind(':id', $data['id']);
+            $this->db->bind(':language_code', $names['language_code']);
+            $this->db->bind(':name', $names['name']);
+
+            // Execute the prepared query
+            $this->db->execute();
+        }
+
+        return [true];
     }
 }
