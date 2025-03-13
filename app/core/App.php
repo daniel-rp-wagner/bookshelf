@@ -83,13 +83,12 @@ class App
         require_once '../app/routes.php';
 		
         $matchedRoute = null;
-        foreach ($routes as $routePattern => $routeInfo) {
-            $this->method = $_SERVER['REQUEST_METHOD'];
-            $regexPattern = str_replace('/', '\/', $routePattern);
-            
-            $regexPattern = str_replace('{lang}', '([a-z]{2})', $regexPattern);
-            $regexPattern = str_replace('{id}', '([0-9]+)', $regexPattern);
-            if (preg_match_all("/^" . $regexPattern . "$/i", $requestedRoute, $matches)) {
+        $this->method = $_SERVER['REQUEST_METHOD'];
+
+        foreach ($routes as $route => $routeInfo) {
+            $regexPattern = $this->routeToPattern($route);
+
+            if (preg_match_all($regexPattern, $requestedRoute, $matches)) {
                 if($routeInfo['method'] === $this->method){
                     $matchedRoute = $routeInfo;
                     if (count($matches) > 1) {
@@ -154,5 +153,15 @@ class App
         }
         // Return an array with an empty string if 'url' parameter is not set 
         return [''];
+    }
+
+    private function routeToPattern($route)
+    {
+        $regexPattern = str_replace('/', '\/', $route);
+        $regexPattern = str_replace('{lang}', '([a-z]{2})', $regexPattern);
+        $regexPattern = str_replace('{id}', '([0-9]+)', $regexPattern);
+        $regexPattern = "/^" . $regexPattern . "$/i";
+
+        return $regexPattern;
     }
 }
