@@ -148,32 +148,41 @@ class City
      */
     public function createCity(array $data): array
     {
-        $this->db->begin();
+        try {
+            $this->db->begin();
 
-        $this->db->query("INSERT INTO cities (id, country_iso, parent_city_id, type) VALUES (:id, :country_iso, :parent, :type)");
-        $this->db->bind(':id', $data['id']);
-        $this->db->bind(':country_iso', $data['country_iso']);
-        $this->db->bind(':parent', $data['parent_city_id']);
-        $this->db->bind(':type', $data['type']);
-        $this->db->execute();
-
-        $this->db->query("INSERT INTO city_coordinates (city_id, latitude, longitude) VALUES (:id, :latitude, :longitude)");
-        $this->db->bind(':id', $data['id']);
-        $this->db->bind(':latitude', $data['coordinates']['latitude']);
-        $this->db->bind(':longitude', $data['coordinates']['longitude']);
-        $this->db->execute();
-
-        foreach ($data['names'] as $nameEntry) {
-            $this->db->query("INSERT INTO city_names (city_id, language_code, name) VALUES (:id, :language_code, :name)");
+            $this->db->query("INSERT INTO cities (id, country_iso, parent_city_id, type) VALUES (:id, :country_iso, :parent, :type)");
             $this->db->bind(':id', $data['id']);
-            $this->db->bind(':language_code', $nameEntry['language_code']);
-            $this->db->bind(':name', $nameEntry['name']);
+            $this->db->bind(':country_iso', $data['country_iso']);
+            $this->db->bind(':parent', $data['parent_city_id']);
+            $this->db->bind(':type', $data['type']);
             $this->db->execute();
+    
+            $this->db->query("INSERT INTO city_coordinates (city_id, latitude, longitude) VALUES (:id, :latitude, :longitude)");
+            $this->db->bind(':id', $data['id']);
+            $this->db->bind(':latitude', $data['coordinates']['latitude']);
+            $this->db->bind(':longitude', $data['coordinates']['longitude']);
+            $this->db->execute();
+    
+            foreach ($data['names'] as $nameEntry) {
+                $this->db->query("INSERT INTO city_names (city_id, language_code, name) VALUES (:id, :language_code, :name)");
+                $this->db->bind(':id', $data['id']);
+                $this->db->bind(':language_code', $nameEntry['language_code']);
+                $this->db->bind(':name', $nameEntry['name']);
+                $this->db->execute();
+            }
+    
+            $this->db->commit();
+
+            return [$data['id']];
+
+        } catch (Exception $e) {
+            $this->db->rollback();
+            // Optional: Fehler protokollieren oder erneut werfen
+            exit;
         }
 
-        $this->db->commit();
-
-        return [$data['id']];
+        
     }
 
     /**
