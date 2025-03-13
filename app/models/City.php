@@ -73,6 +73,7 @@ class City
                 c.id,
                 cn_official.name AS officialName,
                 COALESCE(cn_display.name, cn_official.name) AS displayName,
+                c.country_iso AS countryCode,
                 CASE :lang
                     WHEN 'fr' THEN co.name_fr
                     WHEN 'de' THEN co.name_de
@@ -142,6 +143,43 @@ class City
 
         foreach($data['names'] as $names){
             $this->db->query("INSERT INTO city_names (city_id, language_code, name) VALUES (:id, :language_code, :name)");
+            $this->db->bind(':id', $data['id']);
+            $this->db->bind(':language_code', $names['language_code']);
+            $this->db->bind(':name', $names['name']);
+
+            // Execute the prepared query
+            $this->db->execute();
+        }
+
+        $this->db->commit();
+
+        return [$data['id']];
+    }
+
+    public function updateCity($data)
+    {
+        $this->db->begin();
+
+        $this->db->query("UPDATE cities SET id = :id, country_iso = :country_iso, parent_city_id = :parent, type =:type WHERE id = :id");
+        $this->db->bind(':id', $data['id']);
+        $this->db->bind(':country_iso', $data['country_iso']);
+        $this->db->bind(':parent', $data['parent_city_id']);
+        $this->db->bind(':type', $data['type']);
+
+        // Execute the prepared query
+        $this->db->execute();
+
+        $this->db->query("UPDATE city_coordinates SET city_id = :id, latitude = :latitude, longitude = :longitude WHERE city_id = :id");
+        $this->db->bind(':id', $data['id']);
+        $this->db->bind(':latitude', $data['coordinates']['latitude']);
+        $this->db->bind(':longitude', $data['coordinates']['longitude']);
+
+        // Execute the prepared query
+        $this->db->execute();
+
+        foreach($data['names'] as $names){
+            $this->db->query("UPDATE city_names SET city_id = :id, language_code = :language_code, name = :name WHERE name_id = :name_id");
+            $this->db->bind(':name_id', $names['id']);
             $this->db->bind(':id', $data['id']);
             $this->db->bind(':language_code', $names['language_code']);
             $this->db->bind(':name', $names['name']);
