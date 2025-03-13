@@ -44,6 +44,12 @@ class CityController extends Controller {
 
     // Beispiel: Aufruf via Route: 'api/city/update/{id}'
     public function updateCity($resourceId) {
-        echo "CityController: updateCity method - resourceId: " . $resourceId;
+        $data = file_get_contents('php://input');
+        $data = json_decode($data, true);
+
+         // Load the Book model
+        $cityModel = $this->loadModel("City");
+        // Retrieve the book with the given ID
+        $city = $cityModel->updateCity($data);
     }
 }
