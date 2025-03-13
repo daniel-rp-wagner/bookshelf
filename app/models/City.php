@@ -160,7 +160,9 @@ class City
     {
         $this->db->begin();
 
-        $this->db->query("UPDATE cities SET id = :id, country_iso = :country_iso, parent_city_id = :parent, type =:type WHERE id = :id");
+        $this->deleteCityById($data['id']);
+
+        $this->db->query("INSERT INTO cities (id, country_iso, parent_city_id, type) VALUES (:id, :country_iso, :parent, :type)");
         $this->db->bind(':id', $data['id']);
         $this->db->bind(':country_iso', $data['country_iso']);
         $this->db->bind(':parent', $data['parent_city_id']);
@@ -169,7 +171,7 @@ class City
         // Execute the prepared query
         $this->db->execute();
 
-        $this->db->query("UPDATE city_coordinates SET city_id = :id, latitude = :latitude, longitude = :longitude WHERE city_id = :id");
+        $this->db->query("INSERT INTO city_coordinates (city_id, latitude, longitude) VALUES (:id, :latitude, :longitude)");
         $this->db->bind(':id', $data['id']);
         $this->db->bind(':latitude', $data['coordinates']['latitude']);
         $this->db->bind(':longitude', $data['coordinates']['longitude']);
@@ -178,8 +180,7 @@ class City
         $this->db->execute();
 
         foreach($data['names'] as $names){
-            $this->db->query("UPDATE city_names SET city_id = :id, language_code = :language_code, name = :name WHERE name_id = :name_id");
-            $this->db->bind(':name_id', $names['id']);
+            $this->db->query("INSERT INTO city_names (city_id, language_code, name) VALUES (:id, :language_code, :name)");
             $this->db->bind(':id', $data['id']);
             $this->db->bind(':language_code', $names['language_code']);
             $this->db->bind(':name', $names['name']);
