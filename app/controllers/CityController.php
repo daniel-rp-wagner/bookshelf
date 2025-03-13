@@ -1,55 +1,97 @@
 <?php
 
+/**
+ * Class CityController
+ *
+ * Controller for handling city-related API endpoints.
+ */
 class CityController extends Controller {
-    // Beispiel: Aufruf via Route: 'api/fr/cities'
-    public function index($resourceId, $lang) {
-        // Load the Book model
+
+    /**
+     * Retrieves and outputs all cities.
+     *
+     * This method loads the City model, fetches all cities for the given language,
+     * and outputs the result as JSON.
+     *
+     * @param string $lang The language code for retrieving cities.
+     * @return void
+     */
+    public function index($lang): void {
         $cityModel = $this->loadModel("City");
-        // Retrieve the book with the given ID
         $cities = $cityModel->getAllCities($lang);
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($cities, JSON_UNESCAPED_UNICODE);
+
+        $this->outputData($cities);
     }
 
-    // Beispiel: Aufruf via Route: 'api/fr/city/{id}'
-    public function cityById($resourceId, $lang) {
-        // Load the Book model
+    /**
+     * Retrieves and outputs a single city by its ID.
+     *
+     * This method loads the City model, fetches the city corresponding to the
+     * provided ID and language, and outputs the result as JSON.
+     *
+     * @param int $resourceId The ID of the city.
+     * @param string $lang The language code for retrieving the city.
+     * @return void
+     */
+    public function cityById($resourceId, $lang): void {
         $cityModel = $this->loadModel("City");
-        // Retrieve the book with the given ID
         $city = $cityModel->getCityById($resourceId, $lang);
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($city, JSON_UNESCAPED_UNICODE);
+
+        $this->outputData($city);
     }
 
-    // Beispiel: Aufruf via Route: 'api/city/add'
-    public function addNewCity($lang) {
+    /**
+     * Deletes a city by its ID and outputs the result.
+     *
+     * This method loads the City model, deletes the city with the provided ID,
+     * and outputs the deletion result as JSON.
+     *
+     * @param int $resourceId The ID of the city to delete.
+     * @param string $lang The language code (may be used for logging or other purposes).
+     * @return void
+     */
+    public function deleteCity($resourceId, $lang): void {
+        $cityModel = $this->loadModel("City");
+        $result = $cityModel->deleteCityById($resourceId, $lang);
+        
+        $this->outputData($result);
+    }
+
+    /**
+     * Adds a new city based on JSON input from the request body.
+     *
+     * This method reads JSON data from the request, decodes it into an array,
+     * loads the City model, creates a new city, and outputs the result as JSON.
+     *
+     * @param string $lang The language code for processing input data.
+     * @return void
+     */
+    public function addNewCity($lang): void {
         $data = file_get_contents('php://input');
         $data = json_decode($data, true);
 
-         // Load the Book model
         $cityModel = $this->loadModel("City");
-        // Retrieve the book with the given ID
-        $city = $cityModel->createCity($data);
+        $result = $cityModel->createCity($data);
+
+        $this->outputData($result);
     }
 
-    // Beispiel: Aufruf via Route: 'api/city/delete/{id}'
-    public function deleteCity($resourceId, $lang) {
-        // Load the Book model
-        $cityModel = $this->loadModel("City");
-        // Retrieve the book with the given ID
-        $city = $cityModel->deleteCityById($resourceId, $lang);
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($city, JSON_UNESCAPED_UNICODE);
-    }
-
-    // Beispiel: Aufruf via Route: 'api/city/update/{id}'
-    public function updateCity($resourceId) {
+    /**
+     * Updates an existing city based on JSON input from the request body.
+     *
+     * This method reads JSON data from the request, decodes it into an array,
+     * loads the City model, updates the existing city data, and outputs the result as JSON.
+     *
+     * @param int $resourceId The ID of the city to update.
+     * @return void
+     */
+    public function updateCity($resourceId): void {
         $data = file_get_contents('php://input');
         $data = json_decode($data, true);
 
-         // Load the Book model
         $cityModel = $this->loadModel("City");
-        // Retrieve the book with the given ID
-        $city = $cityModel->updateCity($data);
+        $result = $cityModel->updateCity($data);
+
+        $this->outputData($result);
     }
 }
