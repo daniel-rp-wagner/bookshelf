@@ -85,6 +85,11 @@ class App
         $matchedRoute = null;
         $this->method = $_SERVER['REQUEST_METHOD'];
 
+        if($this->method !== 'GET'){
+            // Autorisierung prüfen
+            $this->checkAuthorization();
+        }
+
         foreach ($routes as $route => $routeInfo) {
             $regexPattern = $this->routeToPattern($route);
 
@@ -155,7 +160,14 @@ class App
         return [''];
     }
 
-    private function routeToPattern($route)
+    /**
+     * Creates a regex pattern from a route
+     *
+     * Replaces {lang} and {id} with the corresponding pattern.
+     *
+     * @return string A regex pattern
+     */
+    private function routeToPattern($route): string
     {
         $regexPattern = str_replace('/', '\/', $route);
         $regexPattern = str_replace('{lang}', '([a-z]{2})', $regexPattern);
@@ -164,4 +176,31 @@ class App
 
         return $regexPattern;
     }
+
+    /**
+     * Checks authorization based on the "Authorization" header.
+     *
+     * If the header is missing or contains an invalid value, a 401 status is returned
+     * and the script terminates.
+     *
+     * @return void
+     */
+    private function checkAuthorization(): void
+    {
+        // Alle Header auslesen
+        $headers = getallheaders();
+        // Hier wird erwartet, dass der Header im Format "Bearer <token>" vorliegt
+        $authHeader = $headers['Authorization'] ?? '';
+        
+        // Beispielsweise soll der Token "my-secret-token" sein.
+        $expectedToken = 'Bearer '. SECRET;
+        
+        if ($authHeader !== $expectedToken) {
+            header('HTTP/1.1 401 Unauthorized');
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['error' => 'Unauthorized']);
+            exit;
+        }
+    }
+
 }
