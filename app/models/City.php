@@ -1,27 +1,40 @@
 <?php
 
-// Define a class named Book this will be the Book model
+/**
+ * Class City
+ *
+ * Model class for handling city-related database operations.
+ */
 class City
 {
+    /**
+     * Database connection instance.
+     *
+     * @var Database
+     */
+    private Database $db;
 
-    // Declare a private property to hold the database connection
-    private $db;
-
-    // Constructor method to initialize the database connection
+    /**
+     * City constructor.
+     *
+     * Initializes a new database connection instance.
+     */
     public function __construct()
     {
-        // Create a new instance of the Database class and assign it to $db
         $this->db = new Database();
     }
 
     /**
-     * Holt alle Orte (ggf. erweiterbar um Paginierung oder Filter).
+     * Retrieve all cities.
      *
-     * @return array
+     * This method fetches all cities with optional filtering, sorting,
+     * or pagination (if implemented).
+     *
+     * @param string $lang The language code for retrieving names.
+     * @return array The result set as an array of cities.
      */
-    public function getAllCities($lang)
+    public function getAllCities(string $lang): array
     {
-        // Prepare a SQL query to select a record from the book table by ID
         $this->db->query("SELECT 
                 c.id,
                 cn_official.name AS officialName,
@@ -52,23 +65,22 @@ class City
                 ON pcn_display.city_id = pc.id 
                 AND pcn_display.language_code = :lang
             ORDER BY officialName ASC");
-        // Bind the id parameter to the query
         $this->db->bind(':lang', $lang);
-        // Execute the prepared query
         $this->db->execute();
-        // Return the result of the query
-        return $this->db->results() ?? [];
+        
+        $result = $this->db->results();
+        return is_array($result) ? $result : [];
     }
 
     /**
-     * Holt einen Ort inklusive aller zugehörigen Daten anhand der ID.
+     * Retrieve a single city by its ID.
      *
-     * @param int $id
-     * @return array
+     * @param int $id The city ID.
+     * @param string $lang The language code for retrieving names.
+     * @return array The result as an associative array.
      */
-    public function getCityById($id, $lang)
+    public function getCityById(int $id, string $lang): array
     {
-        // Prepare a SQL query to select a record from the book table by ID
         $this->db->query("SELECT 
                 c.id,
                 cn_official.name AS officialName,
@@ -102,25 +114,39 @@ class City
                 ON pcn_display.city_id = pc.id 
                 AND pcn_display.language_code = :lang
             WHERE c.id = :id;");
-        // Bind the id parameter to the query
         $this->db->bind(':lang', $lang);
         $this->db->bind(':id', $id);
-        // Execute the prepared query
         $this->db->execute();
-        // Return the result of the query
-        return $this->db->result() ?? [];
+
+        $result = $this->db->result();
+        return is_array($result) ? $result : [];
     }
 
-    public function deleteCityById($id)
+    /**
+     * Delete a city by its ID.
+     *
+     * @param int $id The city ID.
+     * @return bool True on success, false otherwise.
+     */
+    public function deleteCityById(int $id): bool
     {
         $this->db->query("DELETE FROM cities WHERE id = :id");
         $this->db->bind(':id', $id);
-
-        // Execute the prepared query
         return $this->db->execute();
     }
 
-    public function createCity($data)
+    /**
+     * Create a new city.
+     *
+     * This method inserts a new city, its coordinates, and names into the database.
+     *
+     * @param array $data The data for the new city. Expected keys: 'id', 'country_iso', 'parent_city_id', 'type',
+     *                    'coordinates' (associative array with 'latitude' and 'longitude'),
+     *                    and 'names' (an array of arrays with keys 'language_code' and 'name').
+     * @return array Returns an array containing the ID of the newly created city.
+     * @throws Exception If any database operation fails.
+     */
+    public function createCity(array $data): array
     {
         $this->db->begin();
 
@@ -129,25 +155,19 @@ class City
         $this->db->bind(':country_iso', $data['country_iso']);
         $this->db->bind(':parent', $data['parent_city_id']);
         $this->db->bind(':type', $data['type']);
-
-        // Execute the prepared query
         $this->db->execute();
 
         $this->db->query("INSERT INTO city_coordinates (city_id, latitude, longitude) VALUES (:id, :latitude, :longitude)");
         $this->db->bind(':id', $data['id']);
         $this->db->bind(':latitude', $data['coordinates']['latitude']);
         $this->db->bind(':longitude', $data['coordinates']['longitude']);
-
-        // Execute the prepared query
         $this->db->execute();
 
-        foreach($data['names'] as $names){
+        foreach ($data['names'] as $nameEntry) {
             $this->db->query("INSERT INTO city_names (city_id, language_code, name) VALUES (:id, :language_code, :name)");
             $this->db->bind(':id', $data['id']);
-            $this->db->bind(':language_code', $names['language_code']);
-            $this->db->bind(':name', $names['name']);
-
-            // Execute the prepared query
+            $this->db->bind(':language_code', $nameEntry['language_code']);
+            $this->db->bind(':name', $nameEntry['name']);
             $this->db->execute();
         }
 
@@ -156,7 +176,16 @@ class City
         return [$data['id']];
     }
 
-    public function updateCity($data)
+    /**
+     * Update an existing city.
+     *
+     * This method deletes the existing record and inserts new data for the city.
+     *
+     * @param array $data The updated data for the city. Expected keys are the same as in createCity().
+     * @return array Returns an array containing the updated city ID.
+     * @throws Exception If any database operation fails.
+     */
+    public function updateCity(array $data): array
     {
         $this->db->begin();
 
@@ -167,25 +196,19 @@ class City
         $this->db->bind(':country_iso', $data['country_iso']);
         $this->db->bind(':parent', $data['parent_city_id']);
         $this->db->bind(':type', $data['type']);
-
-        // Execute the prepared query
         $this->db->execute();
 
         $this->db->query("INSERT INTO city_coordinates (city_id, latitude, longitude) VALUES (:id, :latitude, :longitude)");
         $this->db->bind(':id', $data['id']);
         $this->db->bind(':latitude', $data['coordinates']['latitude']);
         $this->db->bind(':longitude', $data['coordinates']['longitude']);
-
-        // Execute the prepared query
         $this->db->execute();
 
-        foreach($data['names'] as $names){
+        foreach ($data['names'] as $nameEntry) {
             $this->db->query("INSERT INTO city_names (city_id, language_code, name) VALUES (:id, :language_code, :name)");
             $this->db->bind(':id', $data['id']);
-            $this->db->bind(':language_code', $names['language_code']);
-            $this->db->bind(':name', $names['name']);
-
-            // Execute the prepared query
+            $this->db->bind(':language_code', $nameEntry['language_code']);
+            $this->db->bind(':name', $nameEntry['name']);
             $this->db->execute();
         }
 
