@@ -1,32 +1,54 @@
 <?php
 
-// Define the Controller class
+/**
+ * Class Controller
+ *
+ * Base controller class providing common functionality for loading models,
+ * rendering views, and outputting data in JSON format.
+ */
 class Controller
 {
-    // Method to load a model
-    // Takes the model name as a parameter
-
-    // This will load the model from the models directory
-    // 
-    // ex: Book model from Book.php
-    // ------------------------------------------
-    // require_once '../app/models/Book.php';
-    // return new Book;
-    // ------------------------------------------
-
-    protected function loadModel($model)
+    /**
+     * Loads the specified model.
+     *
+     * This method includes the model file from the app/models directory and returns
+     * a new instance of the specified model.
+     *
+     * @param string $model The name of the model to load.
+     * @return object An instance of the specified model.
+     */
+    protected function loadModel(string $model)
     {
-        // Include the model file from the models directory
         require_once '../app/models/' . $model . '.php';
-        // Instantiate and return the model object
         return new $model;
     }
 
-    // Method to render a view
-    // Takes the view path, data array, and optional title as parameters
-    protected function renderView($data = '', $title = "Shelf")
+    /**
+     * Renders the view.
+     *
+     * This method loads the layout file which is responsible for rendering the view.
+     * Optional data and title can be passed to be used within the view.
+     *
+     * @param mixed $data Optional data to be passed to the view.
+     * @param string $title The title for the view. Default is "Shelf".
+     * @return void
+     */
+    protected function renderView($data = '', string $title = "Shelf"): void
     {
-        // Include the layout file from the views directory
         require_once '../app/views/layout.php';
+    }
+
+    /**
+     * Outputs data in JSON format.
+     *
+     * Sets the content type header to JSON and outputs the provided data as a JSON encoded string.
+     *
+     * @param mixed $data The data to output as JSON.
+     * @return void
+     */
+    protected function outputData($data = ''): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($data, JSON_UNESCAPED_UNICODE);
     }
 }
