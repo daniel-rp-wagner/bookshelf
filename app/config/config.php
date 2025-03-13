@@ -22,4 +22,4 @@ define('DB_PORT', '3306');
 // Define the base URL for the application
 define('BASE_URL', 'http://localhost/public/');
 
-?>
+define('SECRET', 's84u1aKp');
