@@ -82,20 +82,19 @@ class App
         // Import the routes configuration file
         require_once '../app/routes.php';
 		
-        $matchedRoute = null;
+        
         $this->method = $_SERVER['REQUEST_METHOD'];
-
         if($this->method !== 'GET'){
-            // Autorisierung prüfen
+            // Authorization for write operations
             $this->checkAuthorization();
         }
 
-        foreach ($routes as $route => $routeInfo) {
-            $regexPattern = $this->routeToPattern($route);
+        $matchedRoute = null;
 
-            if (preg_match_all($regexPattern, $requestedRoute, $matches)) {
-                if($routeInfo['method'] === $this->method){
-                    $matchedRoute = $routeInfo;
+        foreach($routes as $routeInfo){
+            $regexPattern = $this->routeToPattern($routeInfo['route']);
+            if (preg_match_all($regexPattern, $requestedRoute, $matches) && $routeInfo['method'] === $this->method) {
+                $matchedRoute = $routeInfo;
                     if (count($matches) > 1) {
                         $this->lang = $matches[1][0];
                         if(array_key_exists(2, $matches)){
@@ -104,7 +103,6 @@ class App
                         
                     }
                     break;
-                }
             }
         }
 
