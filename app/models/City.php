@@ -187,32 +187,8 @@ class City
      */
     public function updateCity(array $data): array
     {
-        $this->db->begin();
-
         $this->deleteCityById($data['id']);
-
-        $this->db->query("INSERT INTO cities (id, country_iso, parent_city_id, type) VALUES (:id, :country_iso, :parent, :type)");
-        $this->db->bind(':id', $data['id']);
-        $this->db->bind(':country_iso', $data['country_iso']);
-        $this->db->bind(':parent', $data['parent_city_id']);
-        $this->db->bind(':type', $data['type']);
-        $this->db->execute();
-
-        $this->db->query("INSERT INTO city_coordinates (city_id, latitude, longitude) VALUES (:id, :latitude, :longitude)");
-        $this->db->bind(':id', $data['id']);
-        $this->db->bind(':latitude', $data['coordinates']['latitude']);
-        $this->db->bind(':longitude', $data['coordinates']['longitude']);
-        $this->db->execute();
-
-        foreach ($data['names'] as $nameEntry) {
-            $this->db->query("INSERT INTO city_names (city_id, language_code, name) VALUES (:id, :language_code, :name)");
-            $this->db->bind(':id', $data['id']);
-            $this->db->bind(':language_code', $nameEntry['language_code']);
-            $this->db->bind(':name', $nameEntry['name']);
-            $this->db->execute();
-        }
-
-        $this->db->commit();
+        $this->createCity($data);
 
         return [$data['id']];
     }
