@@ -48,14 +48,14 @@ class App
      *
      * @var int
      */
-    protected $size = 50;
+    protected int $size = 0;
 
     /**
      * The current page number.
      *
      * @var int
      */
-    protected $page = 1;
+    protected int $page = 0;
 
     /**
      * The filter parameter for API queries.
@@ -123,6 +123,7 @@ class App
 			'min_range' => 1,
 		    ],
 		]);
+
 		$this->controllerName = $matchedRoute['controller'];
 		$this->actionName = $matchedRoute['action'];
         } else {
@@ -136,7 +137,7 @@ class App
 
 		if (class_exists($this->controllerName)) {
 			 $controllerInstance = new $this->controllerName();
-			 call_user_func_array([$controllerInstance, $this->actionName], [$this->resourceId, $this->lang]);
+			 call_user_func_array([$controllerInstance, $this->actionName], [$this->resourceId, $this->lang, $this->size, $this->page]);
 		}
     }
 
