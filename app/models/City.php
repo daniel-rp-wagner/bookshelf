@@ -33,7 +33,7 @@ class City
      * @param string $lang The language code for retrieving names.
      * @return array The result set as an array of cities.
      */
-    public function getAllCities(string $lang): array
+    public function getAllCities(string $lang, string $query): array
     {
         $this->db->query("SELECT 
                 c.id,
@@ -63,8 +63,8 @@ class City
                 AND pcn_official.language_code = 'on'
             LEFT JOIN city_names pcn_display 
                 ON pcn_display.city_id = pc.id 
-                AND pcn_display.language_code = :lang
-            ORDER BY officialName ASC");
+                AND pcn_display.language_code = :lang 
+            ORDER BY officialName ASC" . $query);
         $this->db->bind(':lang', $lang);
         $this->db->execute();
         
