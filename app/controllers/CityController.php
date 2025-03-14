@@ -16,9 +16,11 @@ class CityController extends Controller {
      * @param string $lang The language code for retrieving cities.
      * @return void
      */
-    public function index($lang): void {
+    public function index($resourceId, $lang, $size, $page): void {
+        $query = $this->pagination($size, $page);
+
         $cityModel = $this->loadModel("City");
-        $cities = $cityModel->getAllCities($lang);
+        $cities = $cityModel->getAllCities($lang, $query);
 
         $this->outputData($cities);
     }
@@ -66,7 +68,7 @@ class CityController extends Controller {
      * @param string $lang The language code for processing input data.
      * @return void
      */
-    public function addNewCity($lang): void {
+    public function addNewCity($resourceId, $lang): void {
         $data = file_get_contents('php://input');
         $data = json_decode($data, true);
 
