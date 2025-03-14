@@ -51,4 +51,17 @@ class Controller
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($data, JSON_UNESCAPED_UNICODE);
     }
+
+    protected function pagination(int $size, int $page){
+        $query = '';
+
+        if($size > 0 && $page > 0){
+            $limit = $size;
+            $offset = $page > 1 ? ($size * ($page-1)) : 0;
+            
+            $query = ' LIMIT ' . $limit . ' OFFSET ' . $offset;
+        }
+
+        return $query;
+    }
 }
