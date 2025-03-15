@@ -1,25 +1,6 @@
 <?php
-// This is an example template of a config file.
+$env = parse_ini_file('.env');
 
-// Add your credentials and information to connect with your database.
-// Rename file to config.php
-
-// Define the database host
-define('DB_HOST', 'localhost');
-
-// Define the database user name
-define('DB_USER', 'root');
-
-// Define the database user password
-define('DB_PASS', '');
-
-// Define the database name
-define('DB_NAME', 'shelf');
-
-// Define the database port
-define('DB_PORT', '3306');
-
-// Define the base URL for the application
-define('BASE_URL', 'http://localhost/public/');
-
-define('SECRET', 's84u1aKp');
+foreach($env as $key => $value){
+    define($key, $value);
+}
