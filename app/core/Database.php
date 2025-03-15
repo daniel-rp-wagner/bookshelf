@@ -75,4 +75,14 @@ class Database
         // Bind the value to the parameter
         $this->stmt->bindValue($param, $value);
     }
+
+    public function begin()
+    {
+        $this->dbh->beginTransaction();
+    }
+
+    public function commit()
+    {
+        $this->dbh->commit();
+    }
 }
