@@ -29,7 +29,10 @@ class OrganizationController extends Controller {
 
     // Beispiel: Aufruf via Route: 'api/organization/delete/{id}'
     public function deleteOrganization($resourceId) {
-        echo "OrganizationController: deleteOrganization method - resourceId: " . $resourceId;
+        $orgModel = $this->loadModel("Organization");
+        $organization = $orgModel->deleteOrganizationById($resourceId, $lang);
+
+        $this->outputData($organization);
     }
 
     // Beispiel: Aufruf via Route: 'api/organization/update/{id}'
