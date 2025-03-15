@@ -2,16 +2,21 @@
 
 class OrganizationController extends Controller {
     // Beispiel: Aufruf via Route: 'api/organizations'
-    public function index($resourceId = 0) {
-        echo "OrganizationController: index method";
-        if ($resourceId) {
-            echo " - resourceId: " . $resourceId;
-        }
+    public function index($resourceId, $lang, $size, $page): void {
+        $query = $this->pagination($size, $page);
+
+        $orgModel = $this->loadModel("Organization");
+        $organizations = $orgModel->getAllOrganizations($lang, $query);
+
+        $this->outputData($organizations);
     }
 
     // Beispiel: Aufruf via Route: 'api/organization/{id}'
-    public function organizationById($resourceId) {
-        echo "OrganizationController: organizationById method - resourceId: " . $resourceId;
+    public function organizationById($resourceId, $lang) {
+        $orgModel = $this->loadModel("Organization");
+        $organization = $orgModel->getOrganizationById($resourceId, $lang);
+
+        $this->outputData($organization);
     }
 
     // Beispiel: Aufruf via Route: 'api/organization/add'
