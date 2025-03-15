@@ -38,7 +38,7 @@ Bookshelf ist ein leichtgewichtiges PHP-Framework zur Erstellung von REST-APIs m
 
 2. **Konfiguration:**  
    - Erstelle oder passe die Konfigurationsdateien (z. B. `routes.php` im Ordner `app`) an deine Bedürfnisse an.
-   - Stelle sicher, dass sensible Informationen (z. B. Datenbankzugangsdaten) nicht im Repository landen. Nutze hierfür am besten eine `.env`-Datei und trage diese in die `.gitignore` ein.
+   - Erstelle eine `.env`-Datei und trage diese in die `.gitignore` ein.
 
 3. **Datenbank einrichten:**  
    Richte deine MySQL-Datenbank ein und passe die Verbindungseinstellungen in deiner Konfiguration an.
@@ -67,14 +67,10 @@ bookshelf/
 │   ├── routes.php        # Definiert die API-Routen
 │   └── config/           # Konfigurationsdateien
 ├── public/               # Öffentlicher Ordner (Entry Point, z. B. index.php)
-├── vendor/               # Abhängigkeiten (bei Verwendung von Composer)
 └── README.md             # Diese Datei
 ```
 
 ## Weiterentwicklung
-
-- **Autoloading & Namespaces:**  
-  In zukünftigen Versionen kann Composer eingesetzt werden, um Klassen automatisch zu laden und Namespaces zu nutzen.
 
 - **Erweitertes Error-Handling:**  
   Ein zentralisiertes Exception-Handling und Logging (z. B. mit Monolog) kann integriert werden.
