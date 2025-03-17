@@ -38,7 +38,7 @@ $routes = [
     // Deletes an organization based on its ID.
     ['route' => 'api/{lang}/organizations/{id}', 'method' => 'DELETE', 'controller' => 'OrganizationController', 'action' => 'deleteOrganization'],
     // Updates an existing organization based on its ID.
-    ['route' => 'api/{lang}/organizations/{id}', 'method' => 'PUT', 'controller' => 'OrganizationController', 'action' => 'updateOrganization']
+    ['route' => 'api/{lang}/organizations/{id}', 'method' => 'PUT', 'controller' => 'OrganizationController', 'action' => 'updateOrganization'],
 
     // Persons routes
     // List all persons with optional pagination
@@ -52,4 +52,3 @@ $routes = [
     // Delete a person by ID
     ['route' => 'api/{lang}/persons/{id}', 'method' => 'DELETE', 'controller' => 'PersonController', 'action' => 'deletePerson'],
 ];
-
