@@ -61,6 +61,19 @@ class Organization
             return null;
         }
 
+        $this->db->query("SELECT i.translation 
+            FROM organization_types t
+            JOIN i8n i ON t.type = i.variable
+            WHERE t.org_id = :id AND i.lang = :lang");
+        $this->db->bind(':id', $id);
+        $this->db->bind(':lang', $lang);
+        $this->db->execute();
+        
+        $org['types'] = [];
+        foreach($this->db->results() as $type){
+            array_push($org['types'], $type['translation']);
+        };
+
         $this->db->query("SELECT description FROM organization_description WHERE org_id = :id AND lang = :lang");
         $this->db->bind(':id', $id);
         $this->db->bind(':lang', $lang);
