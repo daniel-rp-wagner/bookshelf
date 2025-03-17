@@ -10,38 +10,39 @@
 class App
 {
     /**
-     * The HTTP request method which is required. Default is GET.
+     * The HTTP request method. Default is GET.
      *
      * @var string
      */
-    protected $method = 'GET';
+    protected string $method = 'GET';
+
     /**
      * The name of the controller to be loaded.
      *
      * @var string
      */
-    protected $controllerName = '';
+    protected string $controllerName = '';
 
     /**
      * The name of the action in the controller to be called.
      *
      * @var string
      */
-    protected $actionName = '';
+    protected string $actionName = '';
 
     /**
      * The resource ID extracted from the URL (e.g., in /delete/6).
      *
      * @var int
      */
-    protected $resourceId = 0;
+    protected int $resourceId = 0;
 
     /**
-     * The language parameter, default is 'de'.
+     * The language parameter. Default is 'de'.
      *
      * @var string
      */
-    protected $lang = 'de';
+    protected string $lang = 'de';
 
     /**
      * The number of items per page.
@@ -62,83 +63,93 @@ class App
      *
      * @var string
      */
-    protected $filter = '';
+    protected string $filter = '';
 
     /**
      * App constructor.
      *
-     * This method initializes the application by parsing the URL,
-     * matching it against the route configuration, and invoking the
-     * appropriate controller and action.
+     * Initializes the application by parsing the URL, matching it against the route configuration,
+     * validating request parameters, and invoking the appropriate controller and action.
      *
      * @return void
      */
     public function __construct()
     {
+        // Parse the URL into segments
         $urlSegments = $this->parseUrl();
 
+        // Determine the requested route from URL segments; default to 'index' if none provided
         $requestedRoute = empty($urlSegments[0]) ? 'index' : implode('/', $urlSegments);
 
         // Import the routes configuration file
         require_once '../app/routes.php';
-		
-        
+
+        // Retrieve the current HTTP request method
         $this->method = $_SERVER['REQUEST_METHOD'];
-        if($this->method !== 'GET'){
-            // Authorization for write operations
+
+        // Check authorization for write operations (non-GET requests)
+        if ($this->method !== 'GET') {
             $this->checkAuthorization();
         }
 
         $matchedRoute = null;
 
-        foreach($routes as $routeInfo){
+        // Iterate through each route configuration to find a match
+        foreach ($routes as $routeInfo) {
             $regexPattern = $this->routeToPattern($routeInfo['route']);
             if (preg_match_all($regexPattern, $requestedRoute, $matches) && $routeInfo['method'] === $this->method) {
                 $matchedRoute = $routeInfo;
-                    if (count($matches) > 1) {
-                        $this->lang = $matches[1][0];
-                        if(array_key_exists(2, $matches)){
-                            $this->resourceId = $matches[2][0];
-                        }
-                        
+                if (count($matches) > 1) {
+                    // The first captured group is the language code
+                    $this->lang = $matches[1][0];
+                    // If an ID is captured, assign it as the resource ID
+                    if (array_key_exists(2, $matches)) {
+                        $this->resourceId = (int)$matches[2][0];
                     }
-                    break;
+                }
+                break;
             }
         }
 
         if ($matchedRoute !== null) {
-		// Validiert 'size' als Integer, mit einem Mindestwert von 1 und einem Höchstwert von 100
-		$this->size = filter_input(INPUT_GET, 'size', FILTER_VALIDATE_INT, [
-		    'options' => [
-			'default' => $this->size,  // Fallback-Wert, wenn keine gültige Zahl übergeben wurde
-			'min_range' => 1,
-			'max_range' => 100,
-		    ],
-		]);
-		
-		// Validiert 'page' als Integer, mit einem Mindestwert von 1
-		$this->page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT, [
-		    'options' => [
-			'default' => $this->page,
-			'min_range' => 1,
-		    ],
-		]);
+            // Validate 'size' as an integer with a minimum value of 1 and a maximum value of 100
+            $this->size = (int)filter_input(INPUT_GET, 'size', FILTER_VALIDATE_INT, [
+                'options' => [
+                    'default'   => $this->size,  // Fallback value if no valid number is provided
+                    'min_range' => 1,
+                    'max_range' => 100,
+                ],
+            ]);
 
-		$this->controllerName = $matchedRoute['controller'];
-		$this->actionName = $matchedRoute['action'];
+            // Validate 'page' as an integer with a minimum value of 1
+            $this->page = (int)filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT, [
+                'options' => [
+                    'default'   => $this->page,
+                    'min_range' => 1,
+                ],
+            ]);
+
+            $this->controllerName = $matchedRoute['controller'];
+            $this->actionName = $matchedRoute['action'];
         } else {
-		header("HTTP/1.0 404 Not Found");
-		echo "404 - Route not found!";
-		exit;
+            header("HTTP/1.0 404 Not Found");
+            echo "404 - Route not found!";
+            exit;
         }
 
-        // Include the controller file
+        // Include the corresponding controller file
         require_once '../app/controllers/' . $this->controllerName . '.php';
 
-		if (class_exists($this->controllerName)) {
-			 $controllerInstance = new $this->controllerName();
-			 call_user_func_array([$controllerInstance, $this->actionName], [$this->resourceId, $this->lang, $this->size, $this->page]);
-		}
+        // Instantiate the controller and call the specified action, passing parameters
+        if (class_exists($this->controllerName)) {
+            $controllerInstance = new $this->controllerName();
+            call_user_func_array([$controllerInstance, $this->actionName], [
+                $this->resourceId,
+                $this->lang,
+                $this->size,
+                $this->page
+            ]);
+        }
     }
 
     /**
@@ -148,9 +159,9 @@ class App
      *
      * @return array An array of URL segments.
      */
-    private function parseUrl()
+    private function parseUrl(): array
     {
-        // Check if the 'url' parameter is set in the GET request (.htaccess configurations will process the url)
+        // Check if the 'url' parameter is set in the GET request (.htaccess configurations will process the URL)
         if (isset($_GET['url'])) {
             // Trim any trailing slashes from the URL, sanitize it, and split it into an array
             return explode('/', filter_var(rtrim($_GET['url'], '/'), FILTER_SANITIZE_URL));
@@ -160,13 +171,14 @@ class App
     }
 
     /**
-     * Creates a regex pattern from a route
+     * Creates a regex pattern from a route.
      *
-     * Replaces {lang} and {id} with the corresponding pattern.
+     * Replaces placeholders {lang} and {id} with corresponding regex patterns.
      *
-     * @return string A regex pattern
+     * @param string $route The route pattern containing placeholders.
+     * @return string The resulting regex pattern.
      */
-    private function routeToPattern($route): string
+    private function routeToPattern(string $route): string
     {
         $regexPattern = str_replace('/', '\/', $route);
         $regexPattern = str_replace('{lang}', '([a-z]{2})', $regexPattern);
@@ -179,21 +191,21 @@ class App
     /**
      * Checks authorization based on the "Authorization" header.
      *
-     * If the header is missing or contains an invalid value, a 401 status is returned
+     * If the header is missing or contains an invalid value, a 401 Unauthorized status is returned
      * and the script terminates.
      *
      * @return void
      */
     private function checkAuthorization(): void
     {
-        // Alle Header auslesen
+        // Retrieve all HTTP request headers
         $headers = getallheaders();
-        // Hier wird erwartet, dass der Header im Format "Bearer <token>" vorliegt
+        // Expect the header in the format "Bearer <token>"
         $authHeader = $headers['Authorization'] ?? '';
-        
-        // Beispielsweise soll der Token "my-secret-token" sein.
-        $expectedToken = 'Bearer '. SECRET;
-        
+
+        // For example, the expected token is "Bearer " followed by the secret defined in the SECRET constant.
+        $expectedToken = 'Bearer ' . SECRET;
+
         if ($authHeader !== $expectedToken) {
             header('HTTP/1.1 401 Unauthorized');
             header('Content-Type: application/json; charset=utf-8');
@@ -201,5 +213,4 @@ class App
             exit;
         }
     }
-
 }
