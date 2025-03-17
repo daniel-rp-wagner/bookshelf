@@ -128,4 +128,27 @@ class Organization
         return $this->db->execute();
     }
 
+    public function createOrganization(array $data): array
+    {
+        try {
+            $this->db->begin();
+
+            $this->db->query("INSERT INTO organizations (name, established_year, terminated_year) VALUES (:name, :established_year, :terminated_year)");
+            $this->db->bind(':established_year', $data['established_year']);
+            $this->db->bind(':terminated_year', $data['terminated_year']);
+            $this->db->execute();
+
+            $orgId = $this->pdo->lastInsertId();
+    
+            $this->db->commit();
+
+            return [$data['id']];
+
+        } catch (Exception $e) {
+            $this->db->rollback();
+            // Optional: Fehler protokollieren oder erneut werfen
+            exit;
+        }   
+    }
+
 }
