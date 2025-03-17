@@ -39,4 +39,17 @@ $routes = [
     ['route' => 'api/{lang}/organizations/{id}', 'method' => 'DELETE', 'controller' => 'OrganizationController', 'action' => 'deleteOrganization'],
     // Updates an existing organization based on its ID.
     ['route' => 'api/{lang}/organizations/{id}', 'method' => 'PUT', 'controller' => 'OrganizationController', 'action' => 'updateOrganization']
+
+    // Persons routes
+    // List all persons with optional pagination
+    ['route' => 'api/{lang}/persons', 'method' => 'GET', 'controller' => 'PersonController', 'action' => 'index'],
+    // Create a new person
+    ['route' => 'api/{lang}/persons', 'method' => 'POST', 'controller' => 'PersonController', 'action' => 'addNewPerson'],
+    // Retrieve a single person by ID
+    ['route' => 'api/{lang}/persons/{id}', 'method' => 'GET', 'controller' => 'PersonController', 'action' => 'personById'],
+    // Update an existing person by ID
+    ['route' => 'api/{lang}/persons/{id}', 'method' => 'PUT', 'controller' => 'PersonController', 'action' => 'updatePerson'],
+    // Delete a person by ID
+    ['route' => 'api/{lang}/persons/{id}', 'method' => 'DELETE', 'controller' => 'PersonController', 'action' => 'deletePerson'],
 ];
+
