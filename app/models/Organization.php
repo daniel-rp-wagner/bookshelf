@@ -98,6 +98,15 @@ class Organization
             array_push($org['cities'], $name['city_id']);
         };
 
+        $this->db->query("SELECT r.type, r.child_org_id, o.name
+            FROM organization_rels r 
+            JOIN organizations o ON r.child_org_id = o.id
+            WHERE org_id = :id
+            GROUP BY r.type");
+        $this->db->bind(':id', $id);
+        $this->db->execute();
+        $org['relations'] = $this->db->results();
+
         $this->db->query("SELECT title, url FROM organization_sources WHERE org_id = :id");
         $this->db->bind(':id', $id);
         $this->db->execute();
