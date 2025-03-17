@@ -79,8 +79,18 @@ class Organization
         };
 
         // Städte laden
-        $this->db->query("SELECT city_id FROM organization_cities WHERE org_id = :id");
+        $this->db->query("SELECT c.id, COALESCE(cn_display.name, cn_official.name) AS city_name
+            FROM organization_cities oc
+            JOIN cities c ON oc.city_id = c.id
+            LEFT JOIN city_names cn_official 
+                ON cn_official.city_id = c.id 
+                AND cn_official.language_code = 'on'
+            LEFT JOIN city_names cn_display 
+                ON cn_display.city_id = c.id 
+                AND cn_display.language_code = :lang
+            WHERE oc.org_id = :id;");
         $this->db->bind(':id', $id);
+        $this->db->bind(':lang', $lang);
         $this->db->execute();
 
         $org['cities'] = [];
