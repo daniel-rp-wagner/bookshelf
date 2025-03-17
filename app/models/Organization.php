@@ -138,7 +138,17 @@ class Organization
             $this->db->bind(':terminated_year', $data['terminated_year']);
             $this->db->execute();
 
-            $orgId = $this->pdo->lastInsertId();
+            $orgId = $this->db->lastInsertId();
+
+            // Aliase einfügen
+            $aliasQuery = "INSERT INTO organization_aliases (org_id, name) VALUES ";
+            if (!empty($data['aliases']) && is_array($data['aliases'])) {
+                foreach ($data['aliases'] as $alias) {
+                    $aliasQuery = $aliasQuery . '(' . $orgId . ',' . $alias .')';
+                }
+                $this->db->query($aliasQuery);
+                $this->db->execute();
+            }
     
             $this->db->commit();
 
