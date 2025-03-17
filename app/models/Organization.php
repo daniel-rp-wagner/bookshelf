@@ -93,10 +93,7 @@ class Organization
         $this->db->bind(':lang', $lang);
         $this->db->execute();
 
-        $org['cities'] = [];
-        foreach($this->db->results() as $name){
-            array_push($org['cities'], $name['city_id']);
-        };
+        $org['cities'] = $this->db->results();
 
         $this->db->query("SELECT r.type, r.child_org_id, o.name
             FROM organization_rels r 
@@ -160,5 +157,4 @@ class Organization
             exit;
         }   
     }
-
 }
