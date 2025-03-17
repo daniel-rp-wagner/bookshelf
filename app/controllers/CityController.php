@@ -8,15 +8,18 @@
 class CityController extends Controller {
 
     /**
-     * Retrieves and outputs all cities.
+     * Retrieves and outputs all cities with pagination.
      *
      * This method loads the City model, fetches all cities for the given language,
-     * and outputs the result as JSON.
+     * applies pagination based on the provided size and page parameters, and outputs the result as JSON.
      *
+     * @param mixed $resourceId Unused parameter.
      * @param string $lang The language code for retrieving cities.
+     * @param int $size The number of records per page.
+     * @param int $page The current page number.
      * @return void
      */
-    public function index($resourceId, $lang, $size, $page): void {
+    public function index($resourceId, string $lang, int $size, int $page): void {
         $query = $this->pagination($size, $page);
 
         $cityModel = $this->loadModel("City");
@@ -35,7 +38,7 @@ class CityController extends Controller {
      * @param string $lang The language code for retrieving the city.
      * @return void
      */
-    public function cityById($resourceId, $lang): void {
+    public function cityById(int $resourceId, string $lang): void {
         $cityModel = $this->loadModel("City");
         $city = $cityModel->getCityById($resourceId, $lang);
 
@@ -52,7 +55,7 @@ class CityController extends Controller {
      * @param string $lang The language code (may be used for logging or other purposes).
      * @return void
      */
-    public function deleteCity($resourceId, $lang): void {
+    public function deleteCity(int $resourceId, string $lang): void {
         $cityModel = $this->loadModel("City");
         $result = $cityModel->deleteCityById($resourceId, $lang);
         
@@ -65,10 +68,11 @@ class CityController extends Controller {
      * This method reads JSON data from the request, decodes it into an array,
      * loads the City model, creates a new city, and outputs the result as JSON.
      *
+     * @param mixed $resourceId Unused parameter.
      * @param string $lang The language code for processing input data.
      * @return void
      */
-    public function addNewCity($resourceId, $lang): void {
+    public function addNewCity($resourceId, string $lang): void {
         $data = file_get_contents('php://input');
         $data = json_decode($data, true);
 
@@ -87,7 +91,7 @@ class CityController extends Controller {
      * @param int $resourceId The ID of the city to update.
      * @return void
      */
-    public function updateCity($resourceId): void {
+    public function updateCity(int $resourceId): void {
         $data = file_get_contents('php://input');
         $data = json_decode($data, true);
 
