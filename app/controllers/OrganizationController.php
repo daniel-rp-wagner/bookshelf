@@ -21,10 +21,13 @@ class OrganizationController extends Controller {
 
     // Beispiel: Aufruf via Route: 'api/organization/add'
     public function addNewOrganization($resourceId = 0) {
-        echo "OrganizationController: addNewOrganization method";
-        if ($resourceId) {
-            echo " - resourceId: " . $resourceId;
-        }
+        $data = file_get_contents('php://input');
+        $data = json_decode($data, true);
+
+        $cityModel = $this->loadModel("Organization");
+        $result = $cityModel->createOrganization($data);
+
+        $this->outputData($result);
     }
 
     // Beispiel: Aufruf via Route: 'api/organization/delete/{id}'
