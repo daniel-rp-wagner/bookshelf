@@ -1,87 +1,168 @@
 <?php
 
-// Define a class named Database
+/**
+ * Class Database
+ *
+ * A simple Database class to handle database operations using PDO.
+ * Connection parameters are loaded from configuration constants.
+ */
 class Database
 {
-    // Define private properties for database connection parameters 
-    // Values are taken from the config file
-    private $host = DB_HOST; // Database host
-    private $user = DB_USER; // Database username
-    private $password = DB_PASS; // Database password
-    private $dbname = DB_NAME; // Database name
-    private $dbport = DB_PORT; // Database port
+    /**
+     * Database host.
+     *
+     * @var string
+     */
+    private $host = DB_HOST;
 
-    private $dbh; // Define database handler
-    private $stmt; // Define SQL statement
-    private $error; // Define error message
+    /**
+     * Database username.
+     *
+     * @var string
+     */
+    private $user = DB_USER;
 
-    // Constructor method to initialize the database connection
+    /**
+     * Database password.
+     *
+     * @var string
+     */
+    private $password = DB_PASS;
+
+    /**
+     * Database name.
+     *
+     * @var string
+     */
+    private $dbname = DB_NAME;
+
+    /**
+     * Database port.
+     *
+     * @var int|string
+     */
+    private $dbport = DB_PORT;
+
+    /**
+     * PDO database handler.
+     *
+     * @var PDO
+     */
+    private $dbh;
+
+    /**
+     * PDO statement.
+     *
+     * @var PDOStatement
+     */
+    private $stmt;
+
+    /**
+     * Error message, if any.
+     *
+     * @var string|null
+     */
+    private $error;
+
+    /**
+     * Database constructor.
+     *
+     * Initializes a PDO connection using the provided configuration.
+     */
     public function __construct()
     {
-        // Data Source Name (DSN) for the PDO connection
+        // Build Data Source Name (DSN)
         $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->dbname . ';port=' . $this->dbport . ';charset=utf8';
 
-        // Options for the PDO connection
+        // Set PDO options
         $options = [
-            // Use persistent connection 
-            // (i.e., This prevents establishing a new connection each time when an instance of Database (object) is created.
+            // Use persistent connection to avoid creating a new connection for each instance.
             PDO::ATTR_PERSISTENT => true,
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION // Throw exceptions on errors
+            // Throw exceptions on errors.
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
         ];
 
-        // Try to connect to the database by creating a new PDO instance
+        // Attempt to establish a connection using PDO.
         try {
             $this->dbh = new PDO($dsn, $this->user, $this->password, $options);
         } catch (PDOException $e) {
-            // If an error occurs, store the error message
+            // On error, store and display the error message.
             $this->error = $e->getMessage();
-            // Display error message
             echo $this->error;
         }
     }
 
-    // Method to prepare an SQL query
-    public function query($sql)
+    /**
+     * Prepares an SQL query.
+     *
+     * @param string $sql The SQL query to prepare.
+     * @return void
+     */
+    public function query(string $sql): void
     {
-        // Prepare the SQL statement
         $this->stmt = $this->dbh->prepare($sql);
     }
 
-    // Method to execute the prepared statement
-    public function execute()
+    /**
+     * Executes the prepared SQL statement.
+     *
+     * @return bool Returns true on success or false on failure.
+     */
+    public function execute(): bool
     {
-        // Execute the statement and return the result
         return $this->stmt->execute();
     }
 
-    // Method to fetch all results as an associative array
-    public function results()
+    /**
+     * Fetches all results from the executed statement as an associative array.
+     *
+     * @return array The result set as an associative array.
+     */
+    public function results(): array
     {
-        // Fetch all results to an associative array and return them
         return $this->stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Method to fetch a single result to an associative array
-    public function result() {
-        // Execute the statement
+    /**
+     * Executes the statement and fetches a single result as an associative array.
+     *
+     * @return array|null The single result as an associative array, or null if no result is found.
+     */
+    public function result(): ?array
+    {
         $this->execute();
-        // Fetch and return a single result
-        return $this->stmt->fetch(PDO::FETCH_ASSOC);
+        $result = $this->stmt->fetch(PDO::FETCH_ASSOC);
+        return $result !== false ? $result : null;
     }
 
-    // Method to bind a value to a parameter in the SQL statement
-    public function bind($param, $value)
+    /**
+     * Binds a value to a parameter in the SQL statement.
+     *
+     * @param string $param The parameter identifier.
+     * @param mixed $value The value to bind to the parameter.
+     * @return void
+     */
+    public function bind(string $param, $value): void
     {   
-        // Bind the value to the parameter
         $this->stmt->bindValue($param, $value);
     }
 
-    public function begin()
+    /**
+     * Begins a transaction.
+     *
+     * @return void
+     */
+    public function begin(): void
     {
         $this->dbh->beginTransaction();
     }
 
-    public function commit()
+    /**
+     * Commits the current transaction.
+     *
+     * @return void
+     */
+    public function commit(): void
     {
         $this->dbh->commit();
     }
