@@ -27,7 +27,7 @@ class OrganizationController extends Controller {
         $cityModel = $this->loadModel("Organization");
         $result = $cityModel->createOrganization($data);
 
-        $this->outputData($result);
+        $this->outputData($result, 201);
     }
 
     // Beispiel: Aufruf via Route: 'api/organization/delete/{id}'
@@ -35,7 +35,7 @@ class OrganizationController extends Controller {
         $orgModel = $this->loadModel("Organization");
         $organization = $orgModel->deleteOrganizationById($resourceId, $lang);
 
-        $this->outputData($organization);
+        $this->outputData($organization, 204);
     }
 
     // Beispiel: Aufruf via Route: 'api/organization/update/{id}'
