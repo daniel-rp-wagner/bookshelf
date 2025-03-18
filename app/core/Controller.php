@@ -48,13 +48,14 @@ class Controller
      */
     protected function outputData(mixed $data = '', int $status = 200): void
     {
-        header('Content-Type: application/json; charset=utf-8');
         if($status == 201){
             header('HTTP/1.1 201 Created');
         }
         if($status == 204){
             header('HTTP/1.1 204 No Content');
+            exit;
         }
+        header('Content-Type: application/json; charset=utf-8');
         echo json_encode($data, JSON_UNESCAPED_UNICODE);
     }
 
