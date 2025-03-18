@@ -59,7 +59,7 @@ class CityController extends Controller {
         $cityModel = $this->loadModel("City");
         $result = $cityModel->deleteCityById($resourceId, $lang);
         
-        $this->outputData($result);
+        $this->outputData($result, 204);
     }
 
     /**
@@ -79,7 +79,7 @@ class CityController extends Controller {
         $cityModel = $this->loadModel("City");
         $result = $cityModel->createCity($data);
 
-        $this->outputData($result);
+        $this->outputData($result, 201);
     }
 
     /**
