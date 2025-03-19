@@ -118,8 +118,15 @@ class City
         $this->db->bind(':id', $id);
         $this->db->execute();
 
-        $result = $this->db->result();
-        return is_array($result) ? $result : [];
+        $city = $this->db->result();
+
+        $this->db->query("SELECT * FROM city_names WHERE id = :id;");
+        $this->db->bind(':id', $id);
+        $this->db->execute();
+
+        $city['names'] = $this->db->results();
+
+        return is_array($city) ? $city : [];
     }
 
     /**
