@@ -100,4 +100,23 @@ class CityController extends Controller {
 
         $this->outputData($result);
     }
+
+    /**
+     * Updates the names of an existing city based on JSON input from the request body.
+     *
+     * This method reads JSON data from the request, decodes it into an array,
+     * loads the City model, updates the existing city data, and outputs the result as JSON.
+     *
+     * @param int $resourceId The ID of the city to update.
+     * @return void
+     */
+    public function updateCityName(int $resourceId): void {
+        $data = file_get_contents('php://input');
+        $data = json_decode($data, true);
+
+        $cityModel = $this->loadModel("City");
+        $result = $cityModel->updateCityName($data);
+
+        $this->outputData($result);
+    }
 }
