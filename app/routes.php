@@ -28,7 +28,7 @@ $routes = [
     // Updates an existing city based on its ID.
     ['route' => 'api/{lang}/cities/{id}', 'method' => 'PUT', 'controller' => 'CityController', 'action' => 'updateCity'],
     // Update new names for an existing ID.
-    ['route' => 'api/{lang}/cities/{id}/names', 'method' => 'PUT', 'controller' => 'CityController', 'action' => 'updateCityNames'],
+    ['route' => 'api/{lang}/cities/{id}/names', 'method' => 'PUT', 'controller' => 'CityController', 'action' => 'updateCityName'],
     
     // Routes for organizations:
     // Returns a list of all organizations in the specified language.
