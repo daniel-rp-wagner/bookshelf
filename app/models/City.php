@@ -201,4 +201,18 @@ class City
 
         return [$data['id']];
     }
+
+    /**
+     * Update the names of an existing city.
+     *
+     * This method deletes the existing record and inserts new data for the city.
+     *
+     * @param array $data The updated data for the city. Expected keys are the same as in createCity().
+     * @return array Returns an array containing the updated city ID.
+     * @throws Exception If any database operation fails.
+     */
+    public function updateCityName(array $data): array
+    {
+        // TODO: update the names
+    }
 }
