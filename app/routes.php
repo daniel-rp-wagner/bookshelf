@@ -27,6 +27,8 @@ $routes = [
     ['route' => 'api/{lang}/cities/{id}', 'method' => 'DELETE', 'controller' => 'CityController', 'action' => 'deleteCity'],
     // Updates an existing city based on its ID.
     ['route' => 'api/{lang}/cities/{id}', 'method' => 'PUT', 'controller' => 'CityController', 'action' => 'updateCity'],
+    // Update new names for an existing ID.
+    ['route' => 'api/{lang}/cities/{id}/names', 'method' => 'PUT', 'controller' => 'CityController', 'action' => 'updateCityNames'],
     
     // Routes for organizations:
     // Returns a list of all organizations in the specified language.
@@ -39,7 +41,13 @@ $routes = [
     ['route' => 'api/{lang}/organizations/{id}', 'method' => 'DELETE', 'controller' => 'OrganizationController', 'action' => 'deleteOrganization'],
     // Updates an existing organization based on its ID.
     ['route' => 'api/{lang}/organizations/{id}', 'method' => 'PUT', 'controller' => 'OrganizationController', 'action' => 'updateOrganization'],
-
+    // Updates the descriptions for an organization.
+    ['route' => 'api/{lang}/organizations/{id}/descriptions', 'method' => 'PUT', 'controller' => 'OrganizationController', 'action' => 'updateOrganizationDescription'],
+    // Updates the aliases for an organization.
+    ['route' => 'api/{lang}/organizations/{id}/aliases', 'method' => 'PUT', 'controller' => 'OrganizationController', 'action' => 'updateOrganizationAlias'],
+    // Updates the cities for an organization.
+    ['route' => 'api/{lang}/organizations/{id}/cities', 'method' => 'PUT', 'controller' => 'OrganizationController', 'action' => 'updateOrganizationCity'],
+    
     // Persons routes
     // List all persons with optional pagination
     ['route' => 'api/{lang}/persons', 'method' => 'GET', 'controller' => 'PersonController', 'action' => 'index'],
