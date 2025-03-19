@@ -47,6 +47,8 @@ $routes = [
     ['route' => 'api/{lang}/organizations/{id}/aliases', 'method' => 'PUT', 'controller' => 'OrganizationController', 'action' => 'updateOrganizationAlias'],
     // Updates the cities for an organization.
     ['route' => 'api/{lang}/organizations/{id}/cities', 'method' => 'PUT', 'controller' => 'OrganizationController', 'action' => 'updateOrganizationCity'],
+    // Updates the sources for an organization.
+    ['route' => 'api/{lang}/organizations/{id}/sources', 'method' => 'PUT', 'controller' => 'OrganizationController', 'action' => 'updateOrganizationSource'],
     
     // Persons routes
     // List all persons with optional pagination
