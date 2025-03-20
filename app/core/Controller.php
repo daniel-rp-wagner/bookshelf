@@ -49,10 +49,10 @@ class Controller
     protected function outputData(mixed $data = '', int $status = 200): void
     {
         if($status == 201){
-            header('HTTP/1.1 201 Created');
+            http_response_code(201);
         }
         if($status == 204){
-            header('HTTP/1.1 204 No Content');
+            http_response_code(204);
             exit;
         }
         header('Content-Type: application/json; charset=utf-8');
