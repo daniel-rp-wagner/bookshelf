@@ -62,11 +62,14 @@ Bookshelf ist ein leichtgewichtiges PHP-Framework zur Erstellung von REST-APIs m
 ```
 bookshelf/
 ├── app/
+│   ├── config/           # Konfigurationsdateien
 │   ├── controllers/      # Enthält die Controller-Klassen
+│   ├── core/             # Anwendungsdateien
 │   ├── models/           # Enthält die Model-Klassen (z. B. für Datenbankzugriff)
-│   ├── routes.php        # Definiert die API-Routen
-│   └── config/           # Konfigurationsdateien
+│   ├── views/            # HTML-Gerüst
+│   └── routes.php        # Definiert die API-Routen
 ├── public/               # Öffentlicher Ordner (Entry Point, z. B. index.php)
+│   └── index.php         # Einstiegspunkt in die Anwendung
 └── README.md             # Diese Datei
 ```
 
