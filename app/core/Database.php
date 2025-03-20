@@ -86,7 +86,7 @@ class Database
         try {
             $this->dbh = new PDO($dsn, $this->user, $this->password, $options);
         } catch (PDOException $e) {
-            throw new Exception("Error creating city: " . $e->getMessage());
+            throw new Exception("Database connection not possible " . $e->getMessage());
         }
     }
 
@@ -164,4 +164,25 @@ class Database
     {
         $this->dbh->commit();
     }
+
+    /**
+     * Returns the ID of the last inserted row.
+     *
+     * @return string The ID of the last inserted row.
+     */
+    public function lastInsertId(): string
+    {
+        return $this->dbh->lastInsertId();
+    }
+
+    /**
+     * Returns the number of rows affected by the last executed statement.
+     *
+     * @return int The number of affected rows.
+     */
+    public function rowCount(): int
+    {
+        return $this->stmt->rowCount();
+    }
+
 }
