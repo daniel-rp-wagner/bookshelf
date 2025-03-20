@@ -185,7 +185,7 @@ class City
 
         } catch (Exception $e) {
             $this->db->rollback();
-            return $e;
+            throw new Exception("Error creating city: " . $e->getMessage());
         }
     }
 
