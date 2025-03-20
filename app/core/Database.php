@@ -86,9 +86,7 @@ class Database
         try {
             $this->dbh = new PDO($dsn, $this->user, $this->password, $options);
         } catch (PDOException $e) {
-            // On error, store and display the error message.
-            $this->error = $e->getMessage();
-            echo $this->error;
+            throw new Exception("Error creating city: " . $e->getMessage());
         }
     }
 
