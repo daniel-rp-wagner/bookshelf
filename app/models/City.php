@@ -124,8 +124,10 @@ class City
         $this->db->bind(':id', $id);
         $this->db->execute();
 
-        $city['names'] = $this->db->results();
-
+        $names = $this->db->results();
+        if (!empty($names) && is_array($names)) {
+            $city['names'] = $names;
+        }
         return is_array($city) ? $city : [];
     }
 
@@ -135,11 +137,15 @@ class City
      * @param int $id The city ID.
      * @return bool True on success, false otherwise.
      */
-    public function deleteCityById(int $id): bool
+    public function deleteCityById(int $id): array
     {
         $this->db->query("DELETE FROM cities WHERE id = :id");
         $this->db->bind(':id', $id);
-        return $this->db->execute();
+        if($this->db->execute()){
+            return [];
+        } else {
+            throw new Exception("ID not found"); //TODO: Exception-Handling with 404
+        }
     }
 
     /**
@@ -203,7 +209,7 @@ class City
         $this->deleteCityById($data['id']);
         $this->createCity($data);
 
-        return [$data['id']];
+        return [];
     }
 
     /**
@@ -229,6 +235,6 @@ class City
             $this->db->execute();
         }
 
-         return true;
+         return [];
     }
 }
