@@ -130,13 +130,17 @@ class Organization
      * Delete a organization by its ID.
      *
      * @param int $id The organization ID.
-     * @return bool True on success, false otherwise.
+     * @return array True on success, false otherwise.
      */
-    public function deleteOrganizationById(int $id): bool
+    public function deleteOrganizationById(int $id): array
     {
         $this->db->query("DELETE FROM organizations WHERE id = :id");
         $this->db->bind(':id', $id);
-        return $this->db->execute();
+        if($this->db->execute()){
+            return [];
+        } else {
+            throw new Exception("ID not found"); //TODO: Exception-Handling with 404
+        }
     }
 
     public function createOrganization(array $data): array
