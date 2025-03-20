@@ -188,8 +188,6 @@ class City
             // Optional: Fehler protokollieren oder erneut werfen
             exit;
         }
-
-        
     }
 
     /**
@@ -218,8 +216,20 @@ class City
      * @return array Returns an array containing the updated city ID.
      * @throws Exception If any database operation fails.
      */
-    public function updateCityName(array $data): array
+    public function updateCityName(int $id, array names): array
     {
-        // TODO: update the names
+        $this->db->query("DELETE FROM city_names WHERE city_id = :id");
+        $this->db->bind(':id', $id);
+        $this->db->execute();
+
+        foreach ($names as $nameEntry) {
+            $this->db->query("INSERT INTO city_names (city_id, language_code, name) VALUES (:id, :language_code, :name)");
+            $this->db->bind(':id', $id);
+            $this->db->bind(':language_code', $nameEntry['language_code']);
+            $this->db->bind(':name', $nameEntry['name']);
+            $this->db->execute();
+        }
+
+         return [true];
     }
 }
