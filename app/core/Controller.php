@@ -46,7 +46,7 @@ class Controller
      * @param mixed $data The data to output as JSON.
      * @return void
      */
-    protected function outputData(mixed $data = '', int $status = 200): void
+    protected function outputData(array $data = [], int $status = 200): void
     {
         if($status == 201){
             http_response_code(201);
@@ -54,6 +54,9 @@ class Controller
         if($status == 204){
             http_response_code(204);
             exit;
+        }
+        if (count($data) === 0) {
+            http_response_code(404);
         }
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($data, JSON_UNESCAPED_UNICODE);
