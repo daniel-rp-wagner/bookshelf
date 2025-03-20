@@ -141,7 +141,9 @@ class City
     {
         $this->db->query("DELETE FROM cities WHERE id = :id");
         $this->db->bind(':id', $id);
-        if($this->db->execute()){
+        $this->db->execute();
+
+        if($this->db->rowCount() > 0){
             return [];
         } else {
             throw new Exception("ID not found"); //TODO: Exception-Handling with 404
