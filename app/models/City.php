@@ -120,7 +120,7 @@ class City
 
         $city = $this->db->result();
 
-        $this->db->query("SELECT * FROM city_names WHERE id = :id;");
+        $this->db->query("SELECT * FROM city_names WHERE city_id = :id;");
         $this->db->bind(':id', $id);
         $this->db->execute();
 
@@ -185,8 +185,7 @@ class City
 
         } catch (Exception $e) {
             $this->db->rollback();
-            // Optional: Fehler protokollieren oder erneut werfen
-            exit;
+            return $e;
         }
     }
 
@@ -216,7 +215,7 @@ class City
      * @return array Returns an array containing the updated city ID.
      * @throws Exception If any database operation fails.
      */
-    public function updateCityName(int $id, array names): array
+    public function updateCityName(int $id, array $names): array
     {
         $this->db->query("DELETE FROM city_names WHERE city_id = :id");
         $this->db->bind(':id', $id);
@@ -230,6 +229,6 @@ class City
             $this->db->execute();
         }
 
-         return [true];
+         return true;
     }
 }
