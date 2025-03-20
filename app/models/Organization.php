@@ -33,7 +33,7 @@ class Organization
      * @param string $lang The language code for retrieving names.
      * @return array The result set as an array of organizations.
      */
-    public function getAllOrganizations(string $lang, string $query): array
+    public function getAllOrganizations(string $query): array
     {
         $this->db->query("SELECT * FROM organizations" . $query);
         $this->db->execute();
@@ -43,9 +43,9 @@ class Organization
     }
 
     /**
-     * Retrieve a single city by its ID.
+     * Retrieve a single organization by its ID
      *
-     * @param int $id The city ID.
+     * @param int $id The ID of the organization.
      * @param string $lang The language code for retrieving names.
      * @return array The result as an associative array.
      */
@@ -58,7 +58,7 @@ class Organization
 
         $org = $this->db->result();
         if (!$org) {
-            return null;
+            return [];
         }
 
         $this->db->query("SELECT i.translation 
@@ -79,8 +79,9 @@ class Organization
         $this->db->bind(':lang', $lang);
 
         $this->db->execute();
+        $res = $this->db->result();
 
-        $org['description'] = $this->db->result() ? $this->db->result()['description'] : '';
+        $org['description'] = $res ? $res['description'] : '';
 
         $this->db->query("SELECT name FROM organization_aliases WHERE org_id = :id");
         $this->db->bind(':id', $id);
@@ -144,6 +145,7 @@ class Organization
             $this->db->begin();
 
             $this->db->query("INSERT INTO organizations (name, established_year, terminated_year) VALUES (:name, :established_year, :terminated_year)");
+            $this->db->bind(':name', $data['name']);
             $this->db->bind(':established_year', $data['established_year']);
             $this->db->bind(':terminated_year', $data['terminated_year']);
             $this->db->execute();
@@ -154,20 +156,20 @@ class Organization
             $aliasQuery = "INSERT INTO organization_aliases (org_id, name) VALUES ";
             if (!empty($data['aliases']) && is_array($data['aliases'])) {
                 foreach ($data['aliases'] as $alias) {
-                    $aliasQuery = $aliasQuery . '(' . $orgId . ',' . $alias .')';
+                    $this->db->query("INSERT INTO organization_aliases (org_id, name) VALUES (:org_id, :name)");
+                    $this->db->bind(':org_id', $orgId);
+                    $this->db->bind(':name', $alias);
+                    $this->db->execute();
                 }
-                $this->db->query($aliasQuery);
-                $this->db->execute();
             }
     
             $this->db->commit();
 
-            return [$data['id']];
+            return [$orgId];
 
         } catch (Exception $e) {
             $this->db->rollback();
-            // Optional: Fehler protokollieren oder erneut werfen
-            exit;
+            throw new Exception("Error creating organization: " . $e->getMessage());
         }   
     }
 }
