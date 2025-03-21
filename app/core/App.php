@@ -59,13 +59,6 @@ class App
     protected int $page = 0;
 
     /**
-     * The filter parameter for API queries.
-     *
-     * @var string
-     */
-    protected string $filter = '';
-
-    /**
      * App constructor.
      *
      * Initializes the application by parsing the URL, matching it against the route configuration,
@@ -93,12 +86,13 @@ class App
         }
 
         $matchedRoute = null;
-
+        
         // Iterate through each route configuration to find a match
         foreach ($routes as $routeInfo) {
             $regexPattern = $this->routeToPattern($routeInfo['route']);
             if (preg_match_all($regexPattern, $requestedRoute, $matches) && $routeInfo['method'] === $this->method) {
                 $matchedRoute = $routeInfo;
+
                 if (count($matches) > 1) {
                     // The first captured group is the language code
                     $this->lang = $matches[1][0];
@@ -182,7 +176,6 @@ class App
         $regexPattern = str_replace('{lang}', '([a-z]{2})', $regexPattern);
         $regexPattern = str_replace('{id}', '([0-9]+)', $regexPattern);
         $regexPattern = "/^" . $regexPattern . "$/i";
-
         return $regexPattern;
     }
 

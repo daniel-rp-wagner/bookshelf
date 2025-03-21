@@ -48,9 +48,6 @@ class Controller
      */
     protected function outputData(array $data = [], int $status = 200): void
     {
-        if (count($data) === 0) {
-            throw new ApiException(404, 'NOT_FOUND', 'No data to display here');
-        }
         if ($status == 204) {
             http_response_code(204);
             exit;

@@ -112,6 +112,16 @@ class Database
     }
 
     /**
+     * Rolls back the current transaction.
+     *
+     * @return void
+     */
+    public function rollback(): void
+    {
+        $this->dbh->rollBack();
+    }
+
+    /**
      * Fetches all results from the executed statement as an associative array.
      *
      * @return array The result set as an associative array.
