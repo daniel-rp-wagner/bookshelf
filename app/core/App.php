@@ -178,7 +178,7 @@ class App
      */
     private function routeToPattern(string $route): string
     {
-        $regexPattern = str_replace_all('/', '\/', $route);
+        $regexPattern = str_replace('/', '\/', $route);
         $regexPattern = str_replace('{lang}', '([a-z]{2})', $regexPattern);
         $regexPattern = str_replace('{id}', '([0-9]+)', $regexPattern);
         $regexPattern = "/^" . $regexPattern . "$/i";
