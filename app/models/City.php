@@ -33,7 +33,7 @@ class City
      * @param string $lang The language code for retrieving names.
      * @return array The result set as an array of cities.
      */
-    public function getAllCities(string $lang, string $query, string $countryCode = ''): array
+    public function getAllCities(string $lang, string $paginationQuery, string $countryCode = ''): array
     {
         $sql = "SELECT 
                     c.id,
