@@ -146,7 +146,7 @@ class City
         if($this->db->rowCount() > 0){
             return [];
         } else {
-            throw new Exception("ID not found"); //TODO: Exception-Handling with 404
+            throw new ApiException(404, 'NOT_FOUND', 'ID not found, nothing to delete');
         }
     }
 
@@ -193,7 +193,7 @@ class City
 
         } catch (Exception $e) {
             $this->db->rollback();
-            throw new Exception("Error creating city: " . $e->getMessage());
+            throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage());
         }
     }
 
