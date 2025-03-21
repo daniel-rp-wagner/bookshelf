@@ -20,10 +20,15 @@ class CityController extends Controller {
      * @return void
      */
     public function index($resourceId, string $lang, int $size, int $page): void {
+        $countryCode = $_GET['country'] ?? '';
+        if (!preg_match('/^[A-Z]{2}$/', $countryCode)) {
+            $countryCode = '';
+        }
+        
         $query = $this->pagination($size, $page);
 
         $cityModel = $this->loadModel("City");
-        $cities = $cityModel->getAllCities($lang, $query);
+        $cities = $cityModel->getAllCities($lang, $query, $countryCode);
 
         $this->outputData($cities);
     }
