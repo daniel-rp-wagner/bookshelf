@@ -86,7 +86,7 @@ class Database
         try {
             $this->dbh = new PDO($dsn, $this->user, $this->password, $options);
         } catch (PDOException $e) {
-            throw new Exception("Database connection not possible " . $e->getMessage());
+            throw new ApiException(500, "DATABASE_ERROR", $e->getMessage());
         }
     }
 
