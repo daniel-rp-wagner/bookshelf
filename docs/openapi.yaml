@@ -1,0 +1,227 @@
+openapi: 3.0.3
+info:
+  title: REST API Dokumentation
+  description: A service for managing an antique book collection.
+  version: "0.1.0"
+tags:
+  - name: "Cities"
+    description: "Manage cities in different languages and some meta data"
+servers:
+  - url: https://api.example.com/api/{lang}
+    description: Production server
+    variables:
+      lang:
+        default: de
+        enum:
+          - en
+          - de
+          - fr
+          - la
+paths:
+  /cities:
+    get:
+      summary: Retrieve all cities
+      description: Returns a list of cities with optional pagination and filtering.
+      parameters:
+        - in: query
+          name: size
+          description: Number of items per page.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+        - in: query
+          name: page
+          description: Current page number.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - in: query
+          name: filter
+          description: Filter by country ISO code (e.g. "DE").
+          required: false
+          schema:
+            type: string
+            pattern: "^[A-Z]{2}$"
+      responses:
+        '200':
+          description: A list of cities.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/City'
+      tags:
+        - Cities
+    post:
+      summary: Create a new city
+      description: Creates a new city record.
+      requestBody:
+        description: City object that needs to be added.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewCity'
+      responses:
+        '201':
+          description: City successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/City'
+      security:
+        - basicAuth: [] # use the same name as above
+      tags:
+        - Cities
+  /cities/{id}:
+    get:
+      summary: Retrieve a city by ID
+      description: Returns the details of a specific city.
+      parameters:
+        - in: path
+          name: id
+          description: City ID.
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: City details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/City'
+        '404':
+          description: City not found.
+      tags:
+        - Cities
+    put:
+      summary: Update an existing city
+      description: Updates the city record for the specified ID.
+      parameters:
+        - in: path
+          name: id
+          description: City ID.
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: City object with updated data.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewCity'
+      responses:
+        '200':
+          description: City successfully updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/City'
+      security:
+        - basicAuth: [] # use the same name as above
+      tags:
+        - Cities
+    delete:
+      summary: Delete a city
+      description: Deletes the city with the specified ID.
+      parameters:
+        - in: path
+          name: id
+          description: City ID.
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: City successfully deleted.
+      security:
+        - basicAuth: [] # use the same name as above
+      tags:
+        - Cities
+
+components:
+  securitySchemes:
+    basicAuth: # arbitrary name for the security scheme
+      type: http
+      scheme: basic
+  schemas:
+    City:
+      type: object
+      properties:
+        id:
+          type: integer
+        officialName:
+          type: string
+        displayName:
+          type: string
+        countryCode:
+          type: string
+        country:
+          type: string
+        type:
+          type: string
+        parentCity:
+          type: string
+        coordinates:
+          type: object
+          properties:
+            latitude:
+              type: number
+              format: float
+            longitude:
+              type: number
+              format: float
+        names:
+          type: array
+          items:
+            type: object
+            properties:
+              language_code:
+                type: string
+              name:
+                type: string
+    NewCity:
+      type: object
+      required:
+        - id
+        - country_iso
+        - type
+        - coordinates
+        - names
+      properties:
+        id:
+          type: integer
+        country_iso:
+          type: string
+        parent_city_id:
+          type: integer
+          nullable: true
+        type:
+          type: string
+        coordinates:
+          type: object
+          properties:
+            latitude:
+              type: number
+              format: float
+            longitude:
+              type: number
+              format: float
+        names:
+          type: array
+          items:
+            type: object
+            required:
+              - language_code
+              - name
+            properties:
+              language_code:
+                type: string
+              name:
+                type: string
