@@ -24,7 +24,7 @@ class CityController extends Controller {
         if (!preg_match('/^[A-Z]{2}$/', $countryCode)) {
             $countryCode = '';
         }
-        
+
         $query = $this->pagination($size, $page);
 
         $cityModel = $this->loadModel("City");
@@ -120,7 +120,7 @@ class CityController extends Controller {
         $data = json_decode($data, true);
 
         $cityModel = $this->loadModel("City");
-        $result = $cityModel->updateCityName($data);
+        $result = $cityModel->updateCityName($resourceId, $data['names']);
 
         $this->outputData($result);
     }
