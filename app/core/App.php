@@ -132,9 +132,7 @@ class App
             $this->controllerName = $matchedRoute['controller'];
             $this->actionName = $matchedRoute['action'];
         } else {
-            header("HTTP/1.0 404 Not Found");
-            echo "404 - Route not found!";
-            exit;
+            throw new ApiException(404, 'NOT_FOUND', 'Route not found.');
         }
 
         // Include the corresponding controller file
@@ -207,10 +205,7 @@ class App
         $expectedToken = 'Bearer ' . SECRET;
 
         if ($authHeader !== $expectedToken) {
-            header('HTTP/1.1 401 Unauthorized');
-            header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(['error' => 'Unauthorized']);
-            exit;
+            throw new ApiException(401, 'UNAUTHORIZED', 'Authorization failed: Invalid token provided.');
         }
     }
 }
