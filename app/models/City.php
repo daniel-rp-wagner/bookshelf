@@ -33,39 +33,49 @@ class City
      * @param string $lang The language code for retrieving names.
      * @return array The result set as an array of cities.
      */
-    public function getAllCities(string $lang, string $query): array
+    public function getAllCities(string $lang, string $query, string $countryCode = ''): array
     {
-        $this->db->query("SELECT 
-                c.id,
-                cn_official.name AS officialName,
-                COALESCE(cn_display.name, cn_official.name) AS displayName,
-                c.country_iso AS countryCode,
-                CASE :lang
-                    WHEN 'fr' THEN co.name_fr
-                    WHEN 'de' THEN co.name_de
-                    WHEN 'la' THEN co.name_la
-                    ELSE co.name_de -- Standardfallback
-                END AS country,
-                c.type,
-                COALESCE(pcn_display.name, pcn_official.name) AS parentCity
-            FROM cities c
-            JOIN countries co ON c.country_iso = co.iso_code
-            LEFT JOIN city_names cn_official 
-                ON cn_official.city_id = c.id 
-                AND cn_official.language_code = 'on'
-            LEFT JOIN city_names cn_display 
-                ON cn_display.city_id = c.id 
-                AND cn_display.language_code = :lang
-            LEFT JOIN cities pc 
-                ON c.parent_city_id = pc.id
-            LEFT JOIN city_names pcn_official 
-                ON pcn_official.city_id = pc.id 
-                AND pcn_official.language_code = 'on'
-            LEFT JOIN city_names pcn_display 
-                ON pcn_display.city_id = pc.id 
-                AND pcn_display.language_code = :lang
-            ORDER BY officialName ASC" . $query);
+        $sql = "SELECT 
+                    c.id,
+                    cn_official.name AS officialName,
+                    COALESCE(cn_display.name, cn_official.name) AS displayName,
+                    c.country_iso AS countryCode,
+                    CASE :lang
+                        WHEN 'fr' THEN co.name_fr
+                        WHEN 'de' THEN co.name_de
+                        WHEN 'la' THEN co.name_la
+                        ELSE co.name_de -- Default fallback
+                    END AS country,
+                    c.type,
+                    COALESCE(pcn_display.name, pcn_official.name) AS parentCity
+                FROM cities c
+                JOIN countries co ON c.country_iso = co.iso_code
+                LEFT JOIN city_names cn_official 
+                    ON cn_official.city_id = c.id 
+                    AND cn_official.language_code = 'on'
+                LEFT JOIN city_names cn_display 
+                    ON cn_display.city_id = c.id 
+                    AND cn_display.language_code = :lang
+                LEFT JOIN cities pc 
+                    ON c.parent_city_id = pc.id
+                LEFT JOIN city_names pcn_official 
+                    ON pcn_official.city_id = pc.id 
+                    AND pcn_official.language_code = 'on'
+                LEFT JOIN city_names pcn_display 
+                    ON pcn_display.city_id = pc.id 
+                    AND pcn_display.language_code = :lang";
+
+        // Wenn ein Filter gesetzt wurde, füge einen WHERE-Block hinzu.
+        if (!empty($countryCode)) {
+            // Hier wird z. B. nach dem ISO-Code des Landes gefiltert.
+            $sql .= " WHERE c.country_iso = :filter";
+        }
+    
+        $sql .= " ORDER BY officialName ASC " . $paginationQuery;
+
+        $this->db->query($sql);
         $this->db->bind(':lang', $lang);
+        $this->db->bind(':filter', $countryCode);
         $this->db->execute();
         
         $result = $this->db->results();
