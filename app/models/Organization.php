@@ -109,14 +109,36 @@ class Organization
 
         $org['cities'] = $this->db->results();
 
+        // SQL-Abfrage (ohne GROUP BY, um alle Zeilen zu erhalten)
         $this->db->query("SELECT r.type, r.child_org_id, o.name
             FROM organization_rels r 
             JOIN organizations o ON r.child_org_id = o.id
-            WHERE org_id = :id
-            GROUP BY r.type");
+            WHERE org_id = :id");
         $this->db->bind(':id', $id);
         $this->db->execute();
-        $org['relations'] = $this->db->results();
+        
+        $relations = $this->db->results();
+        
+        // Gruppierung der Ergebnisse
+        $groupedRelations = [
+            'preceeding' => [],
+            'suceeding'  => []
+        ];
+        
+        foreach ($relations as $relation) {
+            if ($relation['type'] === 'pre') {
+                $groupedRelations['preceeding'][] = [
+                    'id'   => $relation['child_org_id'],
+                    'name' => $relation['name']
+                ];
+            } elseif ($relation['type'] === 'suc') {
+                $groupedRelations['suceeding'][] = [
+                    'id'   => $relation['child_org_id'],
+                    'name' => $relation['name']
+                ];
+            }
+        }
+        $org['relations'] = $groupedRelations;
 
         $this->db->query("SELECT title, url FROM organization_sources WHERE org_id = :id");
         $this->db->bind(':id', $id);
