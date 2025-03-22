@@ -121,23 +121,24 @@ class Organization
         
         // Gruppierung der Ergebnisse
         $groupedRelations = [
-            'preceeding' => [],
-            'suceeding'  => []
+            'preceding' => [],
+            'succeeding'  => []
         ];
         
         foreach ($relations as $relation) {
             if ($relation['type'] === 'pre') {
-                $groupedRelations['preceeding'][] = [
+                $groupedRelations['preceding'][] = [
                     'id'   => $relation['child_org_id'],
                     'name' => $relation['name']
                 ];
             } elseif ($relation['type'] === 'suc') {
-                $groupedRelations['suceeding'][] = [
+                $groupedRelations['succeeding'][] = [
                     'id'   => $relation['child_org_id'],
                     'name' => $relation['name']
                 ];
             }
         }
+
         $org['relations'] = $groupedRelations;
 
         $this->db->query("SELECT title, url FROM organization_sources WHERE org_id = :id");
