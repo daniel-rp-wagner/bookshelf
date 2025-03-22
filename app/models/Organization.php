@@ -172,17 +172,130 @@ class Organization
     {
         try {
             $this->db->begin();
-
-            $this->db->query("INSERT INTO organizations (name, established_year, terminated_year) VALUES (:name, :established_year, :terminated_year)");
+    
+            // Insert main organization record
+            $this->db->query(
+                "INSERT INTO organizations (name, established_year, terminated_year) 
+                 VALUES (:name, :established_year, :terminated_year)"
+            );
             $this->db->bind(':name', $data['name']);
             $this->db->bind(':established_year', $data['established_year']);
             $this->db->bind(':terminated_year', $data['terminated_year']);
             $this->db->execute();
-
+    
             $orgId = $this->db->lastInsertId();
-
-            // Aliase einfügen
-            $aliasQuery = "INSERT INTO organization_aliases (org_id, name) VALUES ";
+    
+            // Insert organization aliases if provided
+            if (!empty($data['aliases']) && is_array($data['aliases'])) {
+                foreach ($data['aliases'] as $alias) {
+                    $this->db->query(
+                        "INSERT INTO organization_aliases (org_id, name) 
+                         VALUES (:org_id, :name)"
+                    );
+                    $this->db->bind(':org_id', $orgId);
+                    $this->db->bind(':name', $alias);
+                    $this->db->execute();
+                }
+            }
+    
+            // Insert organization description if provided (requires language)
+            if (!empty($data['description']) && !empty($data['lang'])) {
+                $this->db->query(
+                    "INSERT INTO organization_description (org_id, lang, description) 
+                     VALUES (:org_id, :lang, :description)"
+                );
+                $this->db->bind(':org_id', $orgId);
+                $this->db->bind(':lang', $data['lang']);
+                $this->db->bind(':description', $data['description']);
+                $this->db->execute();
+            }
+    
+            // Insert organization types if provided (array of type keys)
+            if (!empty($data['types']) && is_array($data['types'])) {
+                foreach ($data['types'] as $type) {
+                    $this->db->query(
+                        "INSERT INTO organization_types (org_id, type) 
+                         VALUES (:org_id, :type)"
+                    );
+                    $this->db->bind(':org_id', $orgId);
+                    $this->db->bind(':type', $type);
+                    $this->db->execute();
+                }
+            }
+    
+            // Insert organization cities if provided (array of city IDs)
+            if (!empty($data['cities']) && is_array($data['cities'])) {
+                foreach ($data['cities'] as $cityId) {
+                    $this->db->query(
+                        "INSERT INTO organization_cities (org_id, city_id) 
+                         VALUES (:org_id, :city_id)"
+                    );
+                    $this->db->bind(':org_id', $orgId);
+                    $this->db->bind(':city_id', $cityId);
+                    $this->db->execute();
+                }
+            }
+    
+            // Insert organization sources if provided (array of sources with title and url)
+            if (!empty($data['sources']) && is_array($data['sources'])) {
+                foreach ($data['sources'] as $source) {
+                    $this->db->query(
+                        "INSERT INTO organization_sources (org_id, title, url) 
+                         VALUES (:org_id, :title, :url)"
+                    );
+                    $this->db->bind(':org_id', $orgId);
+                    $this->db->bind(':title', $source['title']);
+                    $this->db->bind(':url', $source['url']);
+                    $this->db->execute();
+                }
+            }
+    
+            $this->db->commit();
+            return [(int)$orgId];
+    
+        } catch (Exception $e) {
+            $this->db->rollback();
+            throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage());
+        }
+    }
+    
+    /**
+     * Update an existing organization.
+     *
+     * This method updates the main organization record and, for related data such as aliases,
+     * description, types, cities, and sources, deletes the existing entries and reinserts the new data.
+     *
+     * @param array $data The updated organization data. Must include 'id' and optionally:
+     *                    'name', 'established_year', 'terminated_year', 'aliases', 'description', 
+     *                    'lang', 'types', 'cities', and 'sources'.
+     * @return array Returns an array containing the updated organization ID.
+     * @throws ApiException If any database operation fails.
+     */
+    public function updateOrganization(array $data): array
+    {
+        try {
+            $this->db->begin();
+    
+            // Update main organization record
+            $this->db->query(
+                "UPDATE organizations SET 
+                    name = :name, 
+                    established_year = :established_year, 
+                    terminated_year = :terminated_year 
+                 WHERE id = :id"
+            );
+            $this->db->bind(':name', $data['name']);
+            $this->db->bind(':established_year', $data['established_year']);
+            $this->db->bind(':terminated_year', $data['terminated_year']);
+            $this->db->bind(':id', $data['id']);
+            $this->db->execute();
+    
+            $orgId = $data['id'];
+    
+            // Update aliases: Delete existing and reinsert new ones
+            $this->db->query("DELETE FROM organization_aliases WHERE org_id = :org_id");
+            $this->db->bind(':org_id', $orgId);
+            $this->db->execute();
             if (!empty($data['aliases']) && is_array($data['aliases'])) {
                 foreach ($data['aliases'] as $alias) {
                     $this->db->query("INSERT INTO organization_aliases (org_id, name) VALUES (:org_id, :name)");
@@ -192,13 +305,66 @@ class Organization
                 }
             }
     
+            // Update description: Delete existing and reinsert if provided
+            if (!empty($data['lang'])) {
+                $this->db->query("DELETE FROM organization_description WHERE org_id = :org_id AND lang = :lang");
+                $this->db->bind(':org_id', $orgId);
+                $this->db->bind(':lang', $data['lang']);
+                $this->db->execute();
+                if (!empty($data['description'])) {
+                    $this->db->query("INSERT INTO organization_description (org_id, lang, description) VALUES (:org_id, :lang, :description)");
+                    $this->db->bind(':org_id', $orgId);
+                    $this->db->bind(':lang', $data['lang']);
+                    $this->db->bind(':description', $data['description']);
+                    $this->db->execute();
+                }
+            }
+    
+            // Update organization types: Delete existing and reinsert new ones
+            $this->db->query("DELETE FROM organization_types WHERE org_id = :org_id");
+            $this->db->bind(':org_id', $orgId);
+            $this->db->execute();
+            if (!empty($data['types']) && is_array($data['types'])) {
+                foreach ($data['types'] as $type) {
+                    $this->db->query("INSERT INTO organization_types (org_id, type) VALUES (:org_id, :type)");
+                    $this->db->bind(':org_id', $orgId);
+                    $this->db->bind(':type', $type);
+                    $this->db->execute();
+                }
+            }
+    
+            // Update organization cities: Delete existing and reinsert new ones
+            $this->db->query("DELETE FROM organization_cities WHERE org_id = :org_id");
+            $this->db->bind(':org_id', $orgId);
+            $this->db->execute();
+            if (!empty($data['cities']) && is_array($data['cities'])) {
+                foreach ($data['cities'] as $cityId) {
+                    $this->db->query("INSERT INTO organization_cities (org_id, city_id) VALUES (:org_id, :city_id)");
+                    $this->db->bind(':org_id', $orgId);
+                    $this->db->bind(':city_id', $cityId);
+                    $this->db->execute();
+                }
+            }
+    
+            // Update organization sources: Delete existing and reinsert new ones
+            $this->db->query("DELETE FROM organization_sources WHERE org_id = :org_id");
+            $this->db->bind(':org_id', $orgId);
+            $this->db->execute();
+            if (!empty($data['sources']) && is_array($data['sources'])) {
+                foreach ($data['sources'] as $source) {
+                    $this->db->query("INSERT INTO organization_sources (org_id, title, url) VALUES (:org_id, :title, :url)");
+                    $this->db->bind(':org_id', $orgId);
+                    $this->db->bind(':title', $source['title']);
+                    $this->db->bind(':url', $source['url']);
+                    $this->db->execute();
+                }
+            }
+    
             $this->db->commit();
-
-            return [$orgId];
-
+            return [(int)$orgId];
         } catch (Exception $e) {
             $this->db->rollback();
             throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage());
-        }   
-    }
+        }
+    }    
 }
