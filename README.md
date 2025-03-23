@@ -19,7 +19,7 @@ Bookshelf ist ein leichtgewichtiges PHP-Framework zur Erstellung von REST-APIs m
 ## Voraussetzungen
 
 - **PHP:**  
-  PHP 7.4 oder höher wird empfohlen.
+  PHP 8.0 oder höher wird empfohlen.
   
 - **MySQL:**  
   Eine MySQL-Datenbank für die Datenspeicherung.
@@ -74,9 +74,6 @@ bookshelf/
 ```
 
 ## Weiterentwicklung
-
-- **Erweitertes Error-Handling:**  
-  Ein zentralisiertes Exception-Handling und Logging (z. B. mit Monolog) kann integriert werden.
 
 - **Tests:**  
   Mit PHPUnit können Unit-Tests zur Sicherstellung der Funktionalität hinzugefügt werden.
