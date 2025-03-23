@@ -43,25 +43,63 @@ class Person
     }
 
     /**
-     * Retrieves a single person by ID.
+     * Retrieves a single person by its ID, including biographies (filtered by language),
+     * aliases, professions (translated via the i8n table), and sources.
      *
-     * @param int $id The ID of the person.
-     * @param string $lang The language code for retrieving person data.
-     * @return array|null The person data as an associative array or null if not found.
+     * @param int $id The person ID.
+     * @param string $lang The language code for retrieving localized data.
+     * @return array The combined person data as an associative array.
      */
-    public function getPersonById(int $id, string $lang): ?array
+    public function getPersonById(int $id, string $lang): array
     {
-        $sql = "SELECT p.id, p.honorificPrefix, p.first_name, p.nobility_particle, p.last_name,
-                       p.religion, p.birth_city_id, p.death_city_id, p.date_of_birth, p.date_of_death,
-                       p.nationality, p.gender
-                FROM persons p
-                WHERE p.id = :id";
-        $this->db->query($sql);
+        // Stammdaten aus der Tabelle persons abrufen
+        $this->db->query("SELECT * FROM persons WHERE id = :id");
         $this->db->bind(':id', $id);
         $this->db->execute();
-        $result = $this->db->result();
-        return $result !== false ? $result : null;
+        $person = $this->db->result();
+        
+        if (!$person) {
+            return [];
+        }
+        
+        // Biografie abrufen (je nach Sprache)
+        $this->db->query("SELECT bio FROM biographies WHERE person_id = :id AND lang = :lang");
+        $this->db->bind(':id', $id);
+        $this->db->bind(':lang', $lang);
+        $this->db->execute();
+        $bio = $this->db->result();
+        $person['biography'] = $bio ? $bio['bio'] : '';
+
+        // Aliase abrufen
+        $this->db->query("SELECT name, type FROM person_aliases WHERE person_id = :id");
+        $this->db->bind(':id', $id);
+        $this->db->execute();
+        $person['aliases'] = $this->db->results();
+
+        // Berufe (professions) abrufen – hier erfolgt ein Join zur i8n-Tabelle,
+        // um den übersetzten Berufsnamen anhand des übergebenen Sprachcodes zu erhalten.
+        $this->db->query("SELECT i.translation AS profession 
+                        FROM person_professions pp 
+                        JOIN i8n i ON pp.profession = i.variable 
+                        WHERE pp.person_id = :id AND i.lang = :lang");
+        $this->db->bind(':id', $id);
+        $this->db->bind(':lang', $lang);
+        $this->db->execute();
+        // Falls gewünscht, nur die Übersetzung extrahieren
+        $professionsRaw = $this->db->results();
+        $person['professions'] = array_map(function($row) {
+            return $row['profession'];
+        }, $professionsRaw);
+
+        // Quellen (sources) abrufen
+        $this->db->query("SELECT title, url FROM person_sources WHERE person_id = :id");
+        $this->db->bind(':id', $id);
+        $this->db->execute();
+        $person['sources'] = $this->db->results();
+
+        return $person;
     }
+
 
     /**
      * Deletes a person by ID.
