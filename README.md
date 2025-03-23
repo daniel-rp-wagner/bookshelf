@@ -1,6 +1,6 @@
 # Bookshelf
 
-Bookshelf ist ein leichtgewichtiges PHP-Framework zur Erstellung von REST-APIs mit MySQL. Es richtet sich an Entwickler, die eine einfache, strukturierte Grundlage für ihre API-Projekte suchen.
+Bookshelf ist ein leichtgewichtiges PHP-Framework zur Erstellung von REST-APIs mit MySQL. 
 
 ## Features
 
