@@ -366,5 +366,140 @@ class Organization
             $this->db->rollback();
             throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage());
         }
-    }    
+    }
+
+    /**
+     * Updates the organization description for a specific organization and language.
+     *
+     * @param int $id The organization ID.
+     * @param string $lang The language code.
+     * @param string $description The new description.
+     * @return array Returns an array containing the organization ID.
+     * @throws ApiException If any database operation fails.
+     */
+    public function updateOrganizationDescription(int $id, string $lang, string $description): array
+    {
+        try {
+            $this->db->begin();
+            // Delete the existing description for this organization and language
+            $this->db->query("DELETE FROM organization_description WHERE org_id = :id AND lang = :lang");
+            $this->db->bind(':id', $id);
+            $this->db->bind(':lang', $lang);
+            $this->db->execute();
+
+            // Insert new description if provided
+            if (!empty($description)) {
+                $this->db->query("INSERT INTO organization_description (org_id, lang, description) VALUES (:id, :lang, :description)");
+                $this->db->bind(':id', $id);
+                $this->db->bind(':lang', $lang);
+                $this->db->bind(':description', $description);
+                $this->db->execute();
+            }
+            $this->db->commit();
+            return [(int)$id];
+        } catch (Exception $e) {
+            $this->db->rollback();
+            throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage());
+        }
+    }
+
+    /**
+     * Updates the organization aliases for a specific organization.
+     *
+     * @param int $id The organization ID.
+     * @param array $aliases Array of aliases.
+     * @return array Returns an array containing the organization ID.
+     * @throws ApiException If any database operation fails.
+     */
+    public function updateOrganizationAlias(int $id, array $aliases): array
+    {
+        try {
+            $this->db->begin();
+            // Delete existing aliases
+            $this->db->query("DELETE FROM organization_aliases WHERE org_id = :id");
+            $this->db->bind(':id', $id);
+            $this->db->execute();
+            // Insert new aliases if provided
+            if (!empty($aliases)) {
+                foreach ($aliases as $alias) {
+                    $this->db->query("INSERT INTO organization_aliases (org_id, name) VALUES (:id, :alias)");
+                    $this->db->bind(':id', $id);
+                    $this->db->bind(':alias', $alias);
+                    $this->db->execute();
+                }
+            }
+            $this->db->commit();
+            return [(int)$id];
+        } catch (Exception $e) {
+            $this->db->rollback();
+            throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage());
+        }
+    }
+
+    /**
+     * Updates the organization cities for a specific organization.
+     *
+     * @param int $id The organization ID.
+     * @param array $cities Array of city IDs.
+     * @return array Returns an array containing the organization ID.
+     * @throws ApiException If any database operation fails.
+     */
+    public function updateOrganizationCity(int $id, array $cities): array
+    {
+        try {
+            $this->db->begin();
+            // Delete existing organization cities
+            $this->db->query("DELETE FROM organization_cities WHERE org_id = :id");
+            $this->db->bind(':id', $id);
+            $this->db->execute();
+            // Insert new cities if provided
+            if (!empty($cities)) {
+                foreach ($cities as $cityId) {
+                    $this->db->query("INSERT INTO organization_cities (org_id, city_id) VALUES (:id, :city_id)");
+                    $this->db->bind(':id', $id);
+                    $this->db->bind(':city_id', $cityId);
+                    $this->db->execute();
+                }
+            }
+            $this->db->commit();
+            return [(int)$id];
+        } catch (Exception $e) {
+            $this->db->rollback();
+            throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage());
+        }
+    }
+
+    /**
+     * Updates the organization sources for a specific organization.
+     *
+     * @param int $id The organization ID.
+     * @param array $sources Array of sources, each with keys 'title' and 'url'.
+     * @return array Returns an array containing the organization ID.
+     * @throws ApiException If any database operation fails.
+     */
+    public function updateOrganizationSource(int $id, array $sources): array
+    {
+        try {
+            $this->db->begin();
+            // Delete existing sources
+            $this->db->query("DELETE FROM organization_sources WHERE org_id = :id");
+            $this->db->bind(':id', $id);
+            $this->db->execute();
+            // Insert new sources if provided
+            if (!empty($sources)) {
+                foreach ($sources as $source) {
+                    $this->db->query("INSERT INTO organization_sources (org_id, title, url) VALUES (:id, :title, :url)");
+                    $this->db->bind(':id', $id);
+                    $this->db->bind(':title', $source['title']);
+                    $this->db->bind(':url', $source['url']);
+                    $this->db->execute();
+                }
+            }
+            $this->db->commit();
+            return [(int)$id];
+        } catch (Exception $e) {
+            $this->db->rollback();
+            throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage());
+        }
+    }
 }
