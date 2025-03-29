@@ -47,7 +47,8 @@ class City
                         ELSE co.name_de -- Default fallback
                     END AS country,
                     c.type,
-                    COALESCE(pcn_display.name, pcn_official.name) AS parentCity
+                    COALESCE(pcn_display.name, pcn_official.name) AS parentCity,
+                    c.parent_city_id AS parentCityId
                 FROM cities c
                 JOIN countries co ON c.country_iso = co.iso_code
                 LEFT JOIN city_names cn_official 
