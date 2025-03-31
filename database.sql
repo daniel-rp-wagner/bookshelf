@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Erstellungszeit: 23. Mrz 2025 um 10:09
+-- Erstellungszeit: 31. Mrz 2025 um 22:04
 -- Server-Version: 10.4.32-MariaDB
 -- PHP-Version: 8.2.12
 
@@ -334,8 +334,8 @@ ALTER TABLE `organization_types`
 ALTER TABLE `persons`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `id` (`id`),
-  ADD KEY `birth_city_id` (`birth_city_id`),
-  ADD KEY `death_city_id` (`death_city_id`);
+  ADD KEY `persons_ibfk_1` (`birth_city_id`),
+  ADD KEY `persons_ibfk_2` (`death_city_id`);
 
 --
 -- Indizes für die Tabelle `person_aliases`
@@ -378,6 +378,12 @@ ALTER TABLE `cities`
 --
 ALTER TABLE `city_names`
   MODIFY `name_id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'unique id for each alternative name';
+
+--
+-- AUTO_INCREMENT für Tabelle `i8n`
+--
+ALTER TABLE `i8n`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'unique id for this key';
 
 --
 -- AUTO_INCREMENT für Tabelle `organizations`
@@ -462,8 +468,8 @@ ALTER TABLE `organization_types`
 -- Constraints der Tabelle `persons`
 --
 ALTER TABLE `persons`
-  ADD CONSTRAINT `persons_ibfk_1` FOREIGN KEY (`birth_city_id`) REFERENCES `city_names` (`name_id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `persons_ibfk_2` FOREIGN KEY (`death_city_id`) REFERENCES `city_names` (`name_id`) ON DELETE SET NULL;
+  ADD CONSTRAINT `persons_ibfk_1` FOREIGN KEY (`birth_city_id`) REFERENCES `cities` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `persons_ibfk_2` FOREIGN KEY (`death_city_id`) REFERENCES `cities` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints der Tabelle `person_aliases`
