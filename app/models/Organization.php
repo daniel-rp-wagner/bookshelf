@@ -25,20 +25,70 @@ class Organization
     }
 
     /**
-     * Retrieve all organizations.
+     * Retrieves all organizations, optionally filtered by type and city,
+     * and returns organization data along with aggregated types (with translation)
+     * and cities (with city ID and name).
      *
-     * This method fetches all organizations with optional filtering, sorting,
-     * or pagination (if implemented).
-     *
-     * @param string $lang The language code for retrieving names.
+     * @param string $lang The language code for retrieving localized values.
+     * @param string $filterType (Optional) The organization type to filter by.
+     * @param string $filterCity (Optional) The city name (in the given language) to filter by.
+     * @param string $paginationQuery (Optional) Additional SQL for pagination (e.g. LIMIT and OFFSET).
      * @return array The result set as an array of organizations.
      */
-    public function getAllOrganizations(string $query): array
-    {
-        $this->db->query("SELECT * FROM organizations" . $query);
-        $this->db->execute();
+    public function getAllOrganizations(string $lang, string $filterType = '', string $filterCity = '', string $paginationQuery = ''): array {
+        $sql = "SELECT 
+                    o.*, 
+                    -- Aggregate organization types with translation: format: type::translation
+                    GROUP_CONCAT(DISTINCT CONCAT(ot.type, '::', COALESCE(i.translation, ot.type)) SEPARATOR ',') AS types,
+                    -- Aggregate organization cities: format: city_id::city_name
+                    GROUP_CONCAT(DISTINCT CONCAT(oc.city_id, '::', COALESCE(cn_display.name, cn_official.name)) SEPARATOR ',') AS cities
+                FROM organizations o
+                LEFT JOIN organization_types ot ON o.id = ot.org_id
+                LEFT JOIN i8n i ON ot.type = i.variable AND i.lang = :lang
+                LEFT JOIN organization_cities oc ON o.id = oc.org_id
+                LEFT JOIN city_names cn_official ON oc.city_id = cn_official.city_id AND cn_official.language_code = 'on'
+                LEFT JOIN city_names cn_display ON oc.city_id = cn_display.city_id AND cn_display.language_code = :lang
+                WHERE 1=1";
         
+        // Filter by organization type if provided
+        if (!empty($filterType)) {
+            $sql .= " AND ot.type = :filterType";
+        }
+        
+        // Filter by city name if provided; matches against the localized city name
+        if (!empty($filterCity)) {
+            $sql .= " AND oc.city_id  = :filterCity";
+        }
+        
+        $sql .= " GROUP BY o.id
+                ORDER BY o.name ASC " . $paginationQuery;
+        
+        $this->db->query($sql);
+        $this->db->bind(':lang', $lang);
+        
+        if (!empty($filterType)) {
+            $this->db->bind(':filterType', $filterType);
+        }
+        if (!empty($filterCity)) {
+            $this->db->bind(':filterCity', $filterCity);
+        }
+        
+        $this->db->execute();
         $result = $this->db->results();
+
+        if (is_array($result)) {
+            foreach ($result as &$org) {
+                // Convert aggregated types string to an object if it exists
+                if (isset($org['types']) && is_string($org['types'])) {
+                    $org['types'] = $this->convertAggregatedStringToObject($org['types']);
+                }
+                // Convert aggregated cities string similarly
+                if (isset($org['cities']) && is_string($org['cities'])) {
+                    $org['cities'] = $this->convertAggregatedStringToObject($org['cities']);
+                }
+            }
+        }
+
         return is_array($result) ? $result : [];
     }
 
@@ -502,4 +552,15 @@ class Organization
             throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage());
         }
     }
+
+    private function convertAggregatedStringToObject(string $aggregatedString): object {
+        $entries = explode(',', $aggregatedString);
+        $result = [];
+        foreach ($entries as $entry) {
+            $entry = trim($entry);
+            list($key, $value) = explode('::', $entry, 2);
+            $result[$key] = $value;
+        }
+        return (object)$result;
+    }    
 }

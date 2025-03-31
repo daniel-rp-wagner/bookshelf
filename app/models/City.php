@@ -106,7 +106,8 @@ class City
                 cc.latitude,
                 cc.longitude,
                 c.type,
-                COALESCE(pcn_display.name, pcn_official.name) AS parentCity
+                COALESCE(pcn_display.name, pcn_official.name) AS parentCity,
+                c.parent_city_id AS parentCityId
             FROM cities c
             JOIN countries co ON c.country_iso = co.iso_code
             JOIN city_coordinates cc ON cc.city_id = c.id

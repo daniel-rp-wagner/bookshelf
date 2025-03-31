@@ -20,9 +20,18 @@ class OrganizationController extends Controller {
      * @return void
      */
     public function index($resourceId, $lang, $size, $page): void {
+        $filterType = $_GET['type'] ?? '';
+        if (!preg_match('/^type[0-9]{3}$/', $filterType)) {
+            $filterType = '';
+        }
+        $filterCity = $_GET['city'] ?? '';
+        if (!preg_match('/^[0-9]+$/', $filterCity)) {
+            $filterCity = '';
+        }
+
         $query = $this->pagination($size, $page);
         $orgModel = $this->loadModel("Organization");
-        $organizations = $orgModel->getAllOrganizations($lang, $query);
+        $organizations = $orgModel->getAllOrganizations($lang, $filterType, $filterCity, $query);
         $this->outputData($organizations);
     }
 

@@ -33,11 +33,24 @@ class Person
      */
     public function getAllPersons(string $lang, string $query = ''): array
     {
-        $sql = "SELECT p.id, p.honorificPrefix, p.first_name, p.nobility_particle, p.last_name,
-                       p.religion, p.birth_city_id, p.death_city_id, p.date_of_birth, p.date_of_death,
-                       p.nationality, p.gender
-                FROM persons p " . $query;
+        $sql = "SELECT p.*,
+                COALESCE(cn_display_birth.name, cn_official_birth.name) AS birth_city_name,
+                COALESCE(cn_display_death.name, cn_official_death.name) AS death_city_name
+            FROM persons p
+            LEFT JOIN city_names cn_official_birth 
+                ON cn_official_birth.city_id = p.birth_city_id 
+                AND cn_official_birth.language_code = 'on'
+            LEFT JOIN city_names cn_display_birth
+                ON cn_display_birth.city_id = p.birth_city_id 
+                AND cn_display_birth.language_code = :lang
+            LEFT JOIN city_names cn_official_death 
+                ON cn_official_death.city_id = p.death_city_id 
+                AND cn_official_death.language_code = 'on'
+            LEFT JOIN city_names cn_display_death 
+                ON cn_display_death.city_id = p.death_city_id 
+                AND cn_display_death.language_code = :lang" . $query;
         $this->db->query($sql);
+        $this->db->bind(':lang', $lang);
         $this->db->execute();
         return $this->db->results();
     }
@@ -53,8 +66,24 @@ class Person
     public function getPersonById(int $id, string $lang): array
     {
         // Stammdaten aus der Tabelle persons abrufen
-        $this->db->query("SELECT * FROM persons WHERE id = :id");
+        $this->db->query("SELECT p.*,
+                COALESCE(cn_display_birth.name, cn_official_birth.name) AS birth_city_name,
+                COALESCE(cn_display_death.name, cn_official_death.name) AS death_city_name
+            FROM persons p
+            LEFT JOIN city_names cn_official_birth 
+                ON cn_official_birth.city_id = p.birth_city_id 
+                AND cn_official_birth.language_code = 'on'
+            LEFT JOIN city_names cn_display_birth
+                ON cn_display_birth.city_id = p.birth_city_id 
+                AND cn_display_birth.language_code = :lang
+            LEFT JOIN city_names cn_official_death 
+                ON cn_official_death.city_id = p.death_city_id 
+                AND cn_official_death.language_code = 'on'
+            LEFT JOIN city_names cn_display_death 
+                ON cn_display_death.city_id = p.death_city_id 
+                AND cn_display_death.language_code = :lang WHERE id = :id");
         $this->db->bind(':id', $id);
+        $this->db->bind(':lang', $lang);
         $this->db->execute();
         $person = $this->db->result();
         

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>REST Test: Cities with Auth</title>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+    label, input, button {
+      margin-top: 0.5em;
+      font-size: 1em;
+    }
+    output {
+      font-family: monospace;
+      white-space: pre-wrap;
+      background: #f9f9f9;
+      border: 1px solid #ccc;
+      padding: 1em;
+      margin-top: 1em;
+      display: block;
+    }
+    .ok { color: green; }
+    .fail { color: red; }
+  </style>
+</head>
+<body>
+
+<h1>REST API Test: <code>/cities</code></h1>
+
+<label for="token">Bearer Token:</label><br>
+<input type="text" id="token" placeholder="Enter your Bearer token here" size="60">
+<button onclick="runCityTests()">Run Tests</button>
+
+<output id="output">Waiting for input…</output>
+
+<script>
+  const output = document.getElementById('output');
+  const API_BASE = 'https://localhost/public/api/de';
+
+  function log(message, success = null) {
+    const line = document.createElement('div');
+    line.textContent = message;
+    if (success === true) line.className = 'ok';
+    if (success === false) line.className = 'fail';
+    output.appendChild(line);
+  }
+
+  function assert(condition, message) {
+    if (!condition) {
+      log("❌ " + message, false);
+      throw new Error(message);
+    }
+    log("✅ " + message, true);
+  }
+
+  async function request(method, path, data, token) {
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+
+    if (method !== 'GET' && token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_BASE}${path}`, {
+      method,
+      headers,
+      body: data ? JSON.stringify(data) : undefined,
+    });
+
+    let body = null;
+    try {
+      body = await response.json();
+    } catch (e) {
+      // ignore if no JSON body
+    }
+
+    return {
+      status: response.status,
+      body
+    };
+  }
+
+  async function runCityTests() {
+    const token = document.getElementById('token').value.trim();
+    output.innerHTML = "<strong>== STARTING TESTS ==</strong><br><br>";
+
+    if (!token) {
+      log("❌ No token provided. Please enter a Bearer token.", false);
+      return;
+    }
+
+    try {
+      // CREATE
+      const newCity = {
+        id: 33333333,
+        country_iso: "DE",
+        parent_city_id: null,
+        type: "city",
+        coordinates: {
+          latitude: 1.2,
+          longitude: 2.2
+        },
+        names: [
+          { language_code: "on", name: "Name1" },
+          { language_code: "fr", name: "Name2" }
+        ]
+      };
+
+      const create = await request('POST', '/cities', newCity, token);
+      log("CREATE: " + JSON.stringify(create));
+      assert(create.status === 200 || create.status === 201, 'Create: Expected status 200 or 201');
+      assert(create.body && create.body[0], 'Create: Response contains ID');
+      const id = create.body[0];
+
+      // GET
+      const get = await request('GET', `/cities/${id}`);
+      log("GET: " + JSON.stringify(get));
+      assert(get.status === 200, 'Get: Expected status 200');
+
+      // UPDATE base city data (without names)
+      const updatedCity = {
+        id: 33333333,
+        country_iso: "DE",
+        parent_city_id: null,
+        type: "city",
+        coordinates: {
+          latitude: 9.9,
+          longitude: 8.8
+        },
+        names: []
+      };
+      const update = await request('PUT', `/cities/${id}`, updatedCity, token);
+      log("UPDATE: " + JSON.stringify(update));
+      assert(update.status === 200, 'Update: Expected status 200');
+
+      // UPDATE names only
+      const newNames = {"names": [
+        { language_code: "on", name: "Berlin" },
+        { language_code: "en", name: "Berlin City" }
+      ]};
+      const nameUpdate = await request('PUT', `/cities/${id}/names`, newNames, token);
+      log("UPDATE NAMES: " + JSON.stringify(nameUpdate));
+      assert(nameUpdate.status === 200, 'Name update: Expected status 200');
+
+      // GET after name update
+      const getAfterNames = await request('GET', `/cities/${id}`);
+      log("GET AFTER NAMES: " + JSON.stringify(getAfterNames));
+      const langCodes = getAfterNames.body.names.map(n => n.language_code);
+      const names = getAfterNames.body.names.map(n => n.name);
+      assert(langCodes.includes("on"), 'Names: Contains language code "on"');
+      assert(names.includes("Berlin"), 'Names: Contains name "Berlin"');
+
+      // DELETE
+      const del = await request('DELETE', `/cities/${id}`, null, token);
+      log("DELETE: " + JSON.stringify(del));
+      assert(del.status === 200 || del.status === 204, 'Delete: Expected status 200 or 204');
+
+      // GET after delete
+      const getAfterDelete = await request('GET', `/cities/${id}`);
+      log("GET AFTER DELETE: " + JSON.stringify(getAfterDelete));
+      assert(getAfterDelete.status === 200, 'Get after delete: Expected status 200');
+
+      log("\n🎉 All tests passed successfully!");
+
+    } catch (err) {
+      log("\n❌ Test failed: " + err.message, false);
+    }
+  }
+</script>
+
+</body>
+</html>
