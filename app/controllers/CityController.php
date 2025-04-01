@@ -117,10 +117,11 @@ class CityController extends Controller {
      */
     public function updateCityName(int $resourceId): void {
         $data = file_get_contents('php://input');
-        $data = json_decode($data, true);
+        $payload = json_decode($data, true);
+        $names = $payload['names'] ?? [];
 
         $cityModel = $this->loadModel("City");
-        $result = $cityModel->updateCityName($resourceId, $data['names']);
+        $result = $cityModel->updateCityName($resourceId, $names);
 
         $this->outputData($result);
     }
