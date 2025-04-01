@@ -13,9 +13,6 @@
  */
 
 $routes = [
-    // Homepage: Displays the index page using the HomeController.
-    ['route' => 'index', 'method' => 'GET', 'controller' => 'HomeController', 'action' => 'index'],
-    
     // Routes for cities:
     // Returns a list of all cities in the specified language.
     ['route' => 'api/{lang}/cities', 'method' => 'GET', 'controller' => 'CityController', 'action' => 'index'],
