@@ -227,4 +227,100 @@ class Person
 
         return [(int)$data['id']];
     }
+
+    /**
+     * Updates the person aliases.
+     *
+     * @param int $id The person ID.
+     * @param array $aliases Array of aliases.
+     * @return array Returns an array containing the person ID.
+     * @throws ApiException If any database operation fails.
+     */
+    public function updatePersonAlias(int $id, array $aliases): array {
+        try {
+            $this->db->begin();
+            $this->db->query("DELETE FROM person_aliases WHERE person_id = :id");
+            $this->db->bind(':id', $id);
+            $this->db->execute();
+
+            if (!empty($aliases)) {
+                foreach ($aliases as $alias) {
+                    $this->db->query("INSERT INTO person_aliases (person_id, name) VALUES (:id, :alias)");
+                    $this->db->bind(':id', $id);
+                    $this->db->bind(':alias', $alias);
+                    $this->db->execute();
+                }
+            }
+            $this->db->commit();
+            return [(int)$id];
+        } catch (Exception $e) {
+            $this->db->rollback();
+            throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage(), 'https://api.example.com/docs/errors#DATABASE_ERROR');
+        }
+    }
+
+    /**
+     * Updates the person sources.
+     *
+     * @param int $id The person ID.
+     * @param array $sources Array of source objects (each with 'title' and 'url').
+     * @return array Returns an array containing the person ID.
+     * @throws ApiException If any database operation fails.
+     */
+    public function updatePersonSource(int $id, array $sources): array {
+        try {
+            $this->db->begin();
+            $this->db->query("DELETE FROM person_sources WHERE person_id = :id");
+            $this->db->bind(':id', $id);
+            $this->db->execute();
+
+            if (!empty($sources)) {
+                foreach ($sources as $source) {
+                    $this->db->query("INSERT INTO person_sources (person_id, title, url) VALUES (:id, :title, :url)");
+                    $this->db->bind(':id', $id);
+                    $this->db->bind(':title', $source['title']);
+                    $this->db->bind(':url', $source['url']);
+                    $this->db->execute();
+                }
+            }
+            $this->db->commit();
+            return [(int)$id];
+        } catch (Exception $e) {
+            $this->db->rollback();
+            throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage(), 'https://api.example.com/docs/errors#DATABASE_ERROR');
+        }
+    }
+
+    /**
+     * Updates the person biography.
+     *
+     * @param int $id The person ID.
+     * @param string $lang The language code.
+     * @param string $biography The new biography.
+     * @return array Returns an array containing the person ID.
+     * @throws ApiException If any database operation fails.
+     */
+    public function updatePersonBiography(int $id, string $lang, string $biography): array {
+        try {
+            $this->db->begin();
+            // Delete the existing biography for this person and language.
+            $this->db->query("DELETE FROM biographies WHERE person_id = :id AND lang = :lang");
+            $this->db->bind(':id', $id);
+            $this->db->bind(':lang', $lang);
+            $this->db->execute();
+
+            if (!empty($biography)) {
+                $this->db->query("INSERT INTO biographies (person_id, lang, bio) VALUES (:id, :lang, :biography)");
+                $this->db->bind(':id', $id);
+                $this->db->bind(':lang', $lang);
+                $this->db->bind(':biography', $biography);
+                $this->db->execute();
+            }
+            $this->db->commit();
+            return [(int)$id];
+        } catch (Exception $e) {
+            $this->db->rollback();
+            throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage(), 'https://api.example.com/docs/errors#DATABASE_ERROR');
+        }
+    }
 }
