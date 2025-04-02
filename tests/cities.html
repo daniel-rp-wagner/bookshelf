@@ -110,7 +110,7 @@
 
       const create = await request('POST', '/cities', newCity, token);
       log("CREATE: " + JSON.stringify(create));
-      assert(create.status === 200 || create.status === 201, 'Create: Expected status 200 or 201');
+      assert(create.status === 201, 'Create: Expected status 200 or 201');
       assert(create.body && create.body[0], 'Create: Response contains ID');
       const id = create.body[0];
 
@@ -155,18 +155,84 @@
       // DELETE
       const del = await request('DELETE', `/cities/${id}`, null, token);
       log("DELETE: " + JSON.stringify(del));
-      assert(del.status === 200 || del.status === 204, 'Delete: Expected status 200 or 204');
+      assert(del.status === 204, 'Delete: Expected status 200 or 204');
 
       // GET after delete
       const getAfterDelete = await request('GET', `/cities/${id}`);
       log("GET AFTER DELETE: " + JSON.stringify(getAfterDelete));
       assert(getAfterDelete.status === 200, 'Get after delete: Expected status 200');
 
-      log("\n🎉 All tests passed successfully!");
+      
+      //
+      // === /ORGANIZATIONS ===
+      //
+      log("==");
+      log("== /organizations Tests ==");
+      log("==");
+      const newOrg = {
+        "name": "TestOrg",
+        "established_year": 1810,
+        "terminated_year": 1910,
+        "aliases": [
+          "TestOrg",
+          "TestOrg 2"
+        ],
+        "types": [
+          "type013",
+          "type042"
+        ],
+        "cities": [
+          2911298
+        ]
+      };
 
+      const createOrg = await request('POST', '/organizations', newOrg, token);
+      log("CREATE ORG: " + JSON.stringify(createOrg));
+      assert(createOrg.status === 201, 'Org: Erstellung erfolgreich');
+      const orgId = createOrg.body[0];
+
+      // GET
+      const getOrg = await request('GET', `/organizations/${orgId}`);
+      log("GET: " + JSON.stringify(getOrg));
+      assert(getOrg.status === 200, 'Get: Expected status 200');
+
+      const updatedOrg = {
+        "id": orgId,
+        "name": "Updated Organization",
+        "established_year": 2010,
+        "terminated_year": 2025,
+        "aliases": [
+          "TestOrg",
+          "TestOrg 2"
+        ],
+        "types": [
+          "type013",
+          "type042"
+        ],
+        "cities": [
+          2911298
+        ]
+      };
+      const putOrg = await request('PUT', `/organizations/${orgId}`, updatedOrg, token);
+      log("UPDATE ORG: " + JSON.stringify(putOrg));
+      assert(putOrg.status === 200, 'Org: Update erfolgreich');
+
+      // GET after UPDATE
+      const getOrgUpdate = await request('GET', `/organizations/${orgId}`);
+      log("GET: " + JSON.stringify(getOrgUpdate));
+      assert(getOrgUpdate.status === 200, 'Get: Expected status 200');
+      assert(getOrgUpdate.body.established_year == 2010, 'Org: Gründungsjahr geändert')
+
+      const delOrg = await request('DELETE', `/organizations/${orgId}`, null, token);
+      log("DELETE ORG: " + JSON.stringify(delOrg));
+      assert(delOrg.status === 204, 'Org: Löschung erfolgreich');
+
+      log("\n🎉 Alle Tests erfolgreich abgeschlossen!");
     } catch (err) {
       log("\n❌ Test failed: " + err.message, false);
     }
+
+
   }
 </script>
 
