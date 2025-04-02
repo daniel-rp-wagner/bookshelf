@@ -100,4 +100,80 @@ class PersonController extends Controller {
 
         $this->outputData($result);
     }
+
+    /**
+     * Updates the person aliases.
+     *
+     * Expects a JSON payload with an "aliases" field containing an array of aliases.
+     *
+     * Example JSON:
+     * {
+     *   "aliases": ["Alias One", "Alias Two"]
+     * }
+     *
+     * @param int $resourceId The person ID.
+     * @param string $lang The language code.
+     * @return void
+     */
+    public function updatePersonAlias(int $resourceId, string $lang): void {
+        $data = file_get_contents('php://input');
+        $payload = json_decode($data, true);
+        $aliases = $payload['aliases'] ?? [];
+
+        $personModel = $this->loadModel("Person");
+        $result = $personModel->updatePersonAlias($resourceId, $aliases);
+        $this->outputData($result);
+    }
+
+    /**
+     * Updates the person sources.
+     *
+     * Expects a JSON payload with a "sources" field containing an array of source objects.
+     * Each source object should have "title" and "url" properties.
+     *
+     * Example JSON:
+     * {
+     *   "sources": [
+     *     { "title": "Official Website", "url": "https://example.com" },
+     *     { "title": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Example_Person" }
+     *   ]
+     * }
+     *
+     * @param int $resourceId The person ID.
+     * @param string $lang The language code.
+     * @return void
+     */
+    public function updatePersonSource(int $resourceId, string $lang): void {
+        $data = file_get_contents('php://input');
+        $payload = json_decode($data, true);
+        $sources = $payload['sources'] ?? [];
+
+        $personModel = $this->loadModel("Person");
+        $result = $personModel->updatePersonSource($resourceId, $sources);
+        $this->outputData($result);
+    }
+
+    /**
+     * Updates the person biography.
+     *
+     * Expects a JSON payload with a "biography" field containing the updated biography.
+     *
+     * Example JSON:
+     * {
+     *   "biography": "This is the updated biography of the person."
+     * }
+     *
+     * @param int $resourceId The person ID.
+     * @param string $lang The language code.
+     * @return void
+     */
+    public function updatePersonBiography(int $resourceId, string $lang): void {
+        $data = file_get_contents('php://input');
+        $payload = json_decode($data, true);
+        $biography = $payload['biography'] ?? '';
+
+        $personModel = $this->loadModel("Person");
+        $result = $personModel->updatePersonBiography($resourceId, $lang, $biography);
+        $this->outputData($result);
+    }
 }
