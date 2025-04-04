@@ -20,10 +20,8 @@ class CityController extends Controller {
      * @return void
      */
     public function index($resourceId, string $lang, int $size, int $page): void {
-        $countryCode = $_GET['country'] ?? '';
-        if (!preg_match('/^[A-Z]{2}$/', $countryCode)) {
-            $countryCode = '';
-        }
+        $params = $this->validateQueryParameters();
+        $countryCode = $params['country'];
 
         $query = $this->pagination($size, $page);
 
