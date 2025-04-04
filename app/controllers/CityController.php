@@ -19,11 +19,11 @@ class CityController extends Controller {
      * @param int $page The current page number.
      * @return void
      */
-    public function index($resourceId, string $lang, int $size, int $page): void {
+    public function index($resourceId, string $lang): void {
         $params = $this->validateQueryParameters();
         $countryCode = $params['country'];
 
-        $query = $this->pagination($size, $page);
+        $query = $this->pagination();
 
         $cityModel = $this->loadModel("City");
         $cities = $cityModel->getAllCities($lang, $query, $countryCode);
