@@ -80,18 +80,21 @@ class Controller
                 'regexp'   => '/^[A-Z]{2}$/',
             ],
         ]);
+        $country = ($country === false || $country === null) ? '' : $country;
     
         $city_id = filter_input(INPUT_GET, 'city', FILTER_VALIDATE_REGEXP, [
             'options' => [
                 'regexp'   => '/^[0-9]+$/',
             ],
         ]);
+        $city_id = ($city_id === false || $city_id === null) ? '' : $city_id;
     
         $type = filter_input(INPUT_GET, 'type', FILTER_VALIDATE_REGEXP, [
             'options' => [
                 'regexp'   => '/^type[0-9]{3}$/',
             ],
         ]);
+        $type = ($type === false || $type === null) ? '' : $type;
     
         return ['size' => $size, 'page' => $page, 'country' => $country, 'city_id' => $city_id, 'type' => $type, ];
     }
