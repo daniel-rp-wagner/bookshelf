@@ -221,7 +221,28 @@
       const getOrgUpdate = await request('GET', `/organizations/${orgId}`);
       log("GET: " + JSON.stringify(getOrgUpdate));
       assert(getOrgUpdate.status === 200, 'Get: Expected status 200');
-      assert(getOrgUpdate.body.established_year == 2010, 'Org: Gründungsjahr geändert')
+      assert(getOrgUpdate.body.established_year == 2010, 'Org: Gründungsjahr geändert');
+
+      const desc = {
+        "description" : "Ein Text"
+      }
+      const putOrgDesc = await request('PUT', `/organizations/${orgId}/description`, desc, token);
+      log("UPDATE ORG: " + JSON.stringify(putOrgDesc));
+      assert(putOrgDesc.status === 200, 'Org: Update erfolgreich');
+
+      const aliases = {
+        "aliases" : ["Update1", "Update2", "Update2"]
+      }
+      const putOrgAliases = await request('PUT', `/organizations/${orgId}/aliases`, aliases, token);
+      log("UPDATE ORG: " + JSON.stringify(putOrgAliases));
+      assert(putOrgAliases.status === 200, 'Org: Update erfolgreich');
+
+      const types = {
+        "types" : ["type001"]
+      }
+      const putOrgTypes = await request('PUT', `/organizations/${orgId}/types`, types, token);
+      log("UPDATE ORG: " + JSON.stringify(putOrgTypes));
+      assert(putOrgTypes.status === 200, 'Org: Update erfolgreich');
 
       const delOrg = await request('DELETE', `/organizations/${orgId}`, null, token);
       log("DELETE ORG: " + JSON.stringify(delOrg));
