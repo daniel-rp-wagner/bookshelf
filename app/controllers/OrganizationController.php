@@ -160,6 +160,16 @@ class OrganizationController extends Controller {
         $this->outputData($result);
     }
 
+    public function updateOrganizationTypes(int $resourceId): void {
+        $data = file_get_contents('php://input');
+        $payload = json_decode($data, true);
+        $types = $payload['types'] ?? [];
+
+        $orgModel = $this->loadModel("Organization");
+        $result = $orgModel->updateOrganizationTypes($resourceId, $types);
+        $this->outputData($result);
+    }
+
     /**
      * Updates the organization cities.
      *
