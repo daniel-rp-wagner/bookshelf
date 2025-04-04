@@ -486,6 +486,31 @@ class Organization
         }
     }
 
+    public function updateOrganizationTypes(int $id, array $types): array
+    {
+        try {
+            $this->db->begin();
+            // Delete existing aliases
+            $this->db->query("DELETE FROM organization_types WHERE org_id = :id");
+            $this->db->bind(':id', $id);
+            $this->db->execute();
+            // Insert new aliases if provided
+            if (!empty($types)) {
+                foreach ($types as $type) {
+                    $this->db->query("INSERT INTO organization_types (org_id, type) VALUES (:id, :type)");
+                    $this->db->bind(':id', $id);
+                    $this->db->bind(':type', $type);
+                    $this->db->execute();
+                }
+            }
+            $this->db->commit();
+            return [(int)$id];
+        } catch (Exception $e) {
+            $this->db->rollback();
+            throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage());
+        }
+    }
+
     /**
      * Updates the organization cities for a specific organization.
      *
