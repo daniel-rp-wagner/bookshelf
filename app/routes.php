@@ -42,6 +42,8 @@ $routes = [
     ['route' => 'api/{lang}/organizations/{id}/descriptions', 'method' => 'PUT', 'controller' => 'OrganizationController', 'action' => 'updateOrganizationDescription'],
     // Updates the aliases for an organization.
     ['route' => 'api/{lang}/organizations/{id}/aliases', 'method' => 'PUT', 'controller' => 'OrganizationController', 'action' => 'updateOrganizationAlias'],
+    // Updates the types for an organization.
+    ['route' => 'api/{lang}/organizations/{id}/types', 'method' => 'PUT', 'controller' => 'OrganizationController', 'action' => 'updateOrganizationTypes'],
     // Updates the cities for an organization.
     ['route' => 'api/{lang}/organizations/{id}/cities', 'method' => 'PUT', 'controller' => 'OrganizationController', 'action' => 'updateOrganizationCity'],
     // Updates the sources for an organization.
