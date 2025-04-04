@@ -231,7 +231,7 @@
       assert(putOrgDesc.status === 200, 'Org: Update erfolgreich');
 
       const aliases = {
-        "aliases" : ["Update1", "Update2", "Update2"]
+        "aliases" : ["Update1", "Update2", "Update3"]
       }
       const putOrgAliases = await request('PUT', `/organizations/${orgId}/aliases`, aliases, token);
       log("UPDATE ORG: " + JSON.stringify(putOrgAliases));
@@ -243,6 +243,10 @@
       const putOrgTypes = await request('PUT', `/organizations/${orgId}/types`, types, token);
       log("UPDATE ORG: " + JSON.stringify(putOrgTypes));
       assert(putOrgTypes.status === 200, 'Org: Update erfolgreich');
+
+      // GET after UPDATES
+      const getOrgUpdate = await request('GET', `/organizations/${orgId}`);
+      log("GET: " + JSON.stringify(getOrgUpdate));
 
       const delOrg = await request('DELETE', `/organizations/${orgId}`, null, token);
       log("DELETE ORG: " + JSON.stringify(delOrg));
