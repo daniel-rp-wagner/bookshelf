@@ -106,23 +106,6 @@ class App
         }
 
         if ($matchedRoute !== null) {
-            // Validate 'size' as an integer with a minimum value of 1 and a maximum value of 100
-            $this->size = (int)filter_input(INPUT_GET, 'size', FILTER_VALIDATE_INT, [
-                'options' => [
-                    'default'   => $this->size,  // Fallback value if no valid number is provided
-                    'min_range' => 1,
-                    'max_range' => 100,
-                ],
-            ]);
-
-            // Validate 'page' as an integer with a minimum value of 1
-            $this->page = (int)filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT, [
-                'options' => [
-                    'default'   => $this->page,
-                    'min_range' => 1,
-                ],
-            ]);
-
             $this->controllerName = $matchedRoute['controller'];
             $this->actionName = $matchedRoute['action'];
         } else {
