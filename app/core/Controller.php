@@ -59,19 +59,57 @@ class Controller
         echo json_encode($data, JSON_UNESCAPED_UNICODE);
     }
 
+    protected function validateQueryParameters(): array {
+        $size = (int)filter_input(INPUT_GET, 'size', FILTER_VALIDATE_INT, [
+            'options' => [
+                'default'   => 0,  // default value
+                'min_range' => 1,
+                'max_range' => 100,
+            ],
+        ]);
+    
+        $page = (int)filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT, [
+            'options' => [
+                'default'   => 0,   // default value
+                'min_range' => 1,
+            ],
+        ]);
+    
+        $country = filter_input(INPUT_GET, 'country', FILTER_VALIDATE_REGEXP, [
+            'options' => [
+                'regexp'   => '/^[A-Z]{2}$/',
+            ],
+        ]);
+    
+        $city_id = filter_input(INPUT_GET, 'city', FILTER_VALIDATE_REGEXP, [
+            'options' => [
+                'regexp'   => '/^[0-9]+$/',
+            ],
+        ]);
+    
+        $type = filter_input(INPUT_GET, 'type', FILTER_VALIDATE_REGEXP, [
+            'options' => [
+                'regexp'   => '/^type[0-9]{3}$/',
+            ],
+        ]);
+    
+        return ['size' => $size, 'page' => $page, 'country' => $country, 'city_id' => $city_id, 'type' => $type, ];
+    }
+
     /**
      * Generates an SQL pagination clause based on the provided size and page number.
      *
      * If both size and page are greater than 0, it calculates the LIMIT and OFFSET values.
      * Otherwise, an empty string is returned.
      *
-     * @param int $size The number of records per page.
-     * @param int $page The current page number.
      * @return string The SQL pagination clause (e.g., " LIMIT 10 OFFSET 20").
      */
-    protected function pagination(int $size, int $page): string
+    protected function pagination(): string
     {
         $query = '';
+        $params = $this->validateQueryParameters();
+        $size = $params['size'];
+        $page = $params['page'];
 
         if ($size > 0 && $page > 0) {
             $limit = $size;
