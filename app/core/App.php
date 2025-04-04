@@ -45,20 +45,6 @@ class App
     protected string $lang = 'de';
 
     /**
-     * The number of items per page.
-     *
-     * @var int
-     */
-    protected int $size = 0;
-
-    /**
-     * The current page number.
-     *
-     * @var int
-     */
-    protected int $page = 0;
-
-    /**
      * App constructor.
      *
      * Initializes the application by parsing the URL, matching it against the route configuration,
