@@ -88,7 +88,7 @@ class Person
         $person = $this->db->result();
         
         if (!$person) {
-            return [];
+            throw new ApiException(404, 'NOT_FOUND', 'ID not found');
         }
         
         // Biografie abrufen (je nach Sprache)
