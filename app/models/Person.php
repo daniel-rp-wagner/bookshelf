@@ -223,6 +223,46 @@ class Person
         $this->db->bind(':id', $data['id']);
         $this->db->execute();
 
+        $this->db->query("DELETE FROM person_aliases WHERE person_id = :id");
+        $this->db->bind(':id', $id);
+        $this->db->execute();
+
+        if (!empty($aliases)) {
+            foreach ($aliases as $alias) {
+                $this->db->query("INSERT INTO person_aliases (person_id, name) VALUES (:id, :alias)");
+                $this->db->bind(':id', $id);
+                $this->db->bind(':alias', $alias);
+                $this->db->execute();
+            }
+        }
+
+        $this->db->query("DELETE FROM person_sources WHERE person_id = :id");
+        $this->db->bind(':id', $id);
+        $this->db->execute();
+
+        if (!empty($sources)) {
+            foreach ($sources as $source) {
+                $this->db->query("INSERT INTO person_sources (person_id, title, url) VALUES (:id, :title, :url)");
+                $this->db->bind(':id', $id);
+                $this->db->bind(':title', $source['title']);
+                $this->db->bind(':url', $source['url']);
+                $this->db->execute();
+            }
+        }
+
+        $this->db->query("DELETE FROM biographies WHERE person_id = :id AND lang = :lang");
+        $this->db->bind(':id', $id);
+        $this->db->bind(':lang', $lang);
+        $this->db->execute();
+
+        if (!empty($biography)) {
+            $this->db->query("INSERT INTO biographies (person_id, lang, bio) VALUES (:id, :lang, :biography)");
+            $this->db->bind(':id', $id);
+            $this->db->bind(':lang', $lang);
+            $this->db->bind(':biography', $biography);
+            $this->db->execute();
+        }
+
         $this->db->commit();
 
         return [(int)$data['id']];
