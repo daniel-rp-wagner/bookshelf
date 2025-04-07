@@ -1,11 +1,8 @@
 openapi: 3.0.3
 info:
-  title: REST API Dokumentation
-  description: A service for managing an antique book collection.
-  version: "0.1.0"
-tags:
-  - name: "Cities"
-    description: "Manage cities in different languages and some meta data"
+  title: Bookshelf API
+  description: API for managing cities, organizations, and persons.
+  version: "1.0.0"
 servers:
   - url: https://api.example.com/api/{lang}
     description: Production server
@@ -13,19 +10,29 @@ servers:
       lang:
         default: de
         enum:
-          - en
           - de
           - fr
           - la
+
+tags:
+  - name: Cities
+    description: Endpoints for managing cities.
+  - name: Organizations
+    description: Endpoints for managing organizations.
+  - name: Persons
+    description: Endpoints for managing persons.
+
 paths:
   /cities:
     get:
+      tags:
+        - Cities
       summary: Retrieve all cities
-      description: Returns a list of cities with optional pagination and filtering.
+      description: Retrieves a list of all cities, optionally with pagination and filtering.
       parameters:
         - in: query
           name: size
-          description: Number of items per page.
+          description: Number of cities per page.
           required: false
           schema:
             type: integer
@@ -40,27 +47,25 @@ paths:
             minimum: 1
         - in: query
           name: filter
-          description: Filter by country ISO code (e.g. "DE").
+          description: Optional filter (e.g. country ISO code).
           required: false
           schema:
             type: string
-            pattern: "^[A-Z]{2}$"
       responses:
         '200':
-          description: A list of cities.
+          description: List of cities.
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/City'
+    post:
       tags:
         - Cities
-    post:
       summary: Create a new city
       description: Creates a new city record.
       requestBody:
-        description: City object that needs to be added.
         required: true
         content:
           application/json:
@@ -68,19 +73,17 @@ paths:
               $ref: '#/components/schemas/NewCity'
       responses:
         '201':
-          description: City successfully created.
+          description: City created successfully.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/City'
-      security:
-        - basicAuth: [] # use the same name as above
-      tags:
-        - Cities
   /cities/{id}:
     get:
-      summary: Retrieve a city by ID
-      description: Returns the details of a specific city.
+      tags:
+        - Cities
+      summary: Retrieve city details
+      description: Retrieves the details of a city by its ID.
       parameters:
         - in: path
           name: id
@@ -97,11 +100,11 @@ paths:
                 $ref: '#/components/schemas/City'
         '404':
           description: City not found.
+    put:
       tags:
         - Cities
-    put:
-      summary: Update an existing city
-      description: Updates the city record for the specified ID.
+      summary: Update city
+      description: Updates the record of a city by its ID.
       parameters:
         - in: path
           name: id
@@ -110,7 +113,6 @@ paths:
           schema:
             type: integer
       requestBody:
-        description: City object with updated data.
         required: true
         content:
           application/json:
@@ -118,18 +120,16 @@ paths:
               $ref: '#/components/schemas/NewCity'
       responses:
         '200':
-          description: City successfully updated.
+          description: City updated successfully.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/City'
-      security:
-        - basicAuth: [] # use the same name as above
+    delete:
       tags:
         - Cities
-    delete:
-      summary: Delete a city
-      description: Deletes the city with the specified ID.
+      summary: Delete city
+      description: Deletes a city by its ID.
       parameters:
         - in: path
           name: id
@@ -139,17 +139,526 @@ paths:
             type: integer
       responses:
         '204':
-          description: City successfully deleted.
-      security:
-        - basicAuth: [] # use the same name as above
+          description: City deleted successfully.
+
+  /organizations:
+    get:
       tags:
-        - Cities
+        - Organizations
+      summary: Retrieve all organizations
+      description: >
+        Retrieves a list of all organizations, optionally with pagination and filtering by type and city.
+        Aggregated fields 'types' and 'cities' are returned as objects.
+      parameters:
+        - in: query
+          name: size
+          description: Number of organizations per page.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+        - in: query
+          name: page
+          description: Current page number.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - in: query
+          name: filterType
+          description: Filter by organization type.
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: filterCity
+          description: Filter by city name.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of organizations.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Organization'
+    post:
+      tags:
+        - Organizations
+      summary: Create a new organization
+      description: Creates a new organization record.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewOrganization'
+      responses:
+        '201':
+          description: Organization created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+  /organizations/{id}:
+    get:
+      tags:
+        - Organizations
+      summary: Retrieve organization details
+      description: Retrieves the details of an organization by its ID.
+      parameters:
+        - in: path
+          name: id
+          description: Organization ID.
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Organization details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        '404':
+          description: Organization not found.
+    put:
+      tags:
+        - Organizations
+      summary: Update organization
+      description: Updates the main record of an organization by its ID.
+      parameters:
+        - in: path
+          name: id
+          description: Organization ID.
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewOrganization'
+      responses:
+        '200':
+          description: Organization updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+    delete:
+      tags:
+        - Organizations
+      summary: Delete organization
+      description: Deletes an organization by its ID.
+      parameters:
+        - in: path
+          name: id
+          description: Organization ID.
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Organization deleted successfully.
+
+  /organizations/{id}/descriptions:
+    put:
+      tags:
+        - Organizations
+      summary: Update organization description
+      description: Updates the description of an organization for a specific language.
+      parameters:
+        - in: path
+          name: id
+          description: Organization ID.
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: lang
+          description: Language code (e.g., en, de).
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: JSON payload containing the new description.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+      responses:
+        '200':
+          description: Organization description updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+
+  /organizations/{id}/aliases:
+    put:
+      tags:
+        - Organizations
+      summary: Update organization aliases
+      description: Updates the aliases of an organization.
+      parameters:
+        - in: path
+          name: id
+          description: Organization ID.
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: lang
+          description: Optional language code.
+          required: false
+          schema:
+            type: string
+      requestBody:
+        description: JSON payload containing an array of aliases.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                aliases:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Organization aliases updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+
+  /organizations/{id}/cities:
+    put:
+      tags:
+        - Organizations
+      summary: Update organization cities
+      description: Updates the cities for an organization. The language code determines the localized display of city names.
+      parameters:
+        - in: path
+          name: id
+          description: Organization ID.
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: lang
+          description: Language code (e.g., en, de).
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: JSON payload containing an array of city IDs.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cities:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: Organization cities updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+
+  /organizations/{id}/sources:
+    put:
+      tags:
+        - Organizations
+      summary: Update organization sources
+      description: Updates the sources of an organization.
+      parameters:
+        - in: path
+          name: id
+          description: Organization ID.
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: lang
+          description: Optional language code.
+          required: false
+          schema:
+            type: string
+      requestBody:
+        description: JSON payload containing an array of source objects.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sources:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      title:
+                        type: string
+                      url:
+                        type: string
+      responses:
+        '200':
+          description: Organization sources updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+
+  /persons:
+    get:
+      tags:
+        - Persons
+      summary: Retrieve all persons
+      description: Retrieves a list of all persons, optionally with pagination.
+      parameters:
+        - in: query
+          name: size
+          description: Number of persons per page.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+        - in: query
+          name: page
+          description: Current page number.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: List of persons.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Person'
+    post:
+      tags:
+        - Persons
+      summary: Create a new person
+      description: Creates a new person record.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewPerson'
+      responses:
+        '201':
+          description: Person created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+  /persons/{id}:
+    get:
+      tags:
+        - Persons
+      summary: Retrieve person details
+      description: Retrieves the details of a person by their ID.
+      parameters:
+        - in: path
+          name: id
+          description: Person ID.
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Person details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+        '404':
+          description: Person not found.
+    put:
+      tags:
+        - Persons
+      summary: Update person
+      description: Updates the main record of a person by their ID.
+      parameters:
+        - in: path
+          name: id
+          description: Person ID.
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewPerson'
+      responses:
+        '200':
+          description: Person updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+    delete:
+      tags:
+        - Persons
+      summary: Delete person
+      description: Deletes a person by their ID.
+      parameters:
+        - in: path
+          name: id
+          description: Person ID.
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Person deleted successfully.
+
+  /persons/{id}/aliases:
+    put:
+      tags:
+        - Persons
+      summary: Update person aliases
+      description: Updates the aliases of a person.
+      parameters:
+        - in: path
+          name: id
+          description: Person ID.
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: lang
+          description: Optional language code.
+          required: false
+          schema:
+            type: string
+      requestBody:
+        description: JSON payload containing an array of aliases.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                aliases:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Person aliases updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+
+  /persons/{id}/sources:
+    put:
+      tags:
+        - Persons
+      summary: Update person sources
+      description: Updates the sources of a person.
+      parameters:
+        - in: path
+          name: id
+          description: Person ID.
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: lang
+          description: Optional language code.
+          required: false
+          schema:
+            type: string
+      requestBody:
+        description: JSON payload containing an array of source objects.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sources:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      title:
+                        type: string
+                      url:
+                        type: string
+      responses:
+        '200':
+          description: Person sources updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+
+  /persons/{id}/biographies:
+    put:
+      tags:
+        - Persons
+      summary: Update person biography
+      description: Updates the biography of a person for the specified language.
+      parameters:
+        - in: path
+          name: id
+          description: Person ID.
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: lang
+          description: Language code (e.g., en, de).
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: JSON payload containing the updated biography.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                biography:
+                  type: string
+      responses:
+        '200':
+          description: Person biography updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
 
 components:
-  securitySchemes:
-    basicAuth: # arbitrary name for the security scheme
-      type: http
-      scheme: basic
   schemas:
     City:
       type: object
@@ -189,21 +698,23 @@ components:
     NewCity:
       type: object
       required:
-        - id
-        - country_iso
+        - officialName
+        - countryCode
         - type
         - coordinates
         - names
       properties:
-        id:
-          type: integer
-        country_iso:
+        officialName:
           type: string
-        parent_city_id:
-          type: integer
-          nullable: true
+        displayName:
+          type: string
+        countryCode:
+          type: string
         type:
           type: string
+        parentCity:
+          type: string
+          nullable: true
         coordinates:
           type: object
           properties:
@@ -217,11 +728,192 @@ components:
           type: array
           items:
             type: object
-            required:
-              - language_code
-              - name
             properties:
               language_code:
                 type: string
               name:
+                type: string
+    Organization:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        established_year:
+          type: integer
+        terminated_year:
+          type: integer
+          nullable: true
+        types:
+          type: object
+          description: >
+            An object representing organization types, where each key is the type key and its value is the translated value.
+          additionalProperties:
+            type: string
+        cities:
+          type: object
+          description: >
+            An object representing organization cities, where each key is the city ID and its value is the localized city name.
+          additionalProperties:
+            type: string
+        description:
+          type: string
+        aliases:
+          type: array
+          items:
+            type: string
+        sources:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              url:
+                type: string
+    NewOrganization:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        established_year:
+          type: integer
+        terminated_year:
+          type: integer
+          nullable: true
+        aliases:
+          type: array
+          items:
+            type: string
+        description:
+          type: string
+        lang:
+          type: string
+          description: "Language code for the description."
+        types:
+          type: array
+          items:
+            type: string
+        cities:
+          type: array
+          items:
+            type: integer
+        sources:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              url:
+                type: string
+    Person:
+      type: object
+      properties:
+        id:
+          type: integer
+        honorificPrefix:
+          type: string
+        first_name:
+          type: string
+        nobility_particle:
+          type: string
+        last_name:
+          type: string
+        religion:
+          type: string
+        birth_city_id:
+          type: integer
+        death_city_id:
+          type: integer
+        date_of_birth:
+          type: string
+          format: date
+        date_of_death:
+          type: string
+          format: date
+        nationality:
+          type: string
+        gender:
+          type: string
+        biography:
+          type: string
+        aliases:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              type:
+                type: string
+        professions:
+          type: array
+          items:
+            type: string
+        sources:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              url:
+                type: string
+    NewPerson:
+      type: object
+      required:
+        - first_name
+        - last_name
+      properties:
+        honorificPrefix:
+          type: string
+        first_name:
+          type: string
+        nobility_particle:
+          type: string
+        last_name:
+          type: string
+        religion:
+          type: string
+        birth_city_id:
+          type: integer
+        death_city_id:
+          type: integer
+        date_of_birth:
+          type: string
+          format: date
+        date_of_death:
+          type: string
+          format: date
+        nationality:
+          type: string
+        gender:
+          type: string
+        biography:
+          type: string
+        aliases:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              type:
+                type: string
+        professions:
+          type: array
+          items:
+            type: string
+        sources:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              url:
                 type: string
