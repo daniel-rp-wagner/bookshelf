@@ -132,6 +132,10 @@ class City
 
         $city = $this->db->result();
 
+        if (!$city) {
+            throw new ApiException(404, 'NOT_FOUND', 'ID not found');
+        }
+
         $this->db->query("SELECT * FROM city_names WHERE city_id = :id;");
         $this->db->bind(':id', $id);
         $this->db->execute();
