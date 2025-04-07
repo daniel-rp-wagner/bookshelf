@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>REST Test: Cities with Auth</title>
+  <title>REST Test: CRUD operations with Auth</title>
   <style>
     body {
       font-family: sans-serif;
@@ -26,7 +26,7 @@
 </head>
 <body>
 
-<h1>REST API Test: <code>/cities</code></h1>
+<h1>REST API Test: <code>/cities</code> and <code>/organizations</code></h1>
 
 <label for="token">Bearer Token:</label><br>
 <input type="text" id="token" placeholder="Enter your Bearer token here" size="60">
@@ -160,7 +160,7 @@
       // GET after delete
       const getAfterDelete = await request('GET', `/cities/${id}`);
       log("GET AFTER DELETE: " + JSON.stringify(getAfterDelete));
-      assert(getAfterDelete.status === 200, 'Get after delete: Expected status 200');
+      assert(getAfterDelete.status === 404, 'Get after delete: Expected status 404');
 
       
       //
@@ -251,6 +251,11 @@
       const delOrg = await request('DELETE', `/organizations/${orgId}`, null, token);
       log("DELETE ORG: " + JSON.stringify(delOrg));
       assert(delOrg.status === 204, 'Org: Löschung erfolgreich');
+
+      // GET after delete
+      const getAfterDeleteOrg = await request('GET', `/organizations/${orgId}`);
+      log("GET AFTER DELETE: " + JSON.stringify(getAfterDeleteOrg));
+      assert(getAfterDeleteOrg.status === 404, 'Get after delete: Expected status 404');
 
       log("\n🎉 Alle Tests erfolgreich abgeschlossen!");
     } catch (err) {
