@@ -108,7 +108,7 @@ class Organization
 
         $org = $this->db->result();
         if (!$org) {
-            return [];
+            throw new ApiException(404, 'NOT_FOUND', 'ID not found');
         }
 
         $this->db->query("SELECT i.translation 
