@@ -257,7 +257,7 @@ class Person
             return [(int)$newId];
         } catch (Exception $e) {
             $this->db->rollback();
-            throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage(), 'https://api.example.com/docs/errors#DATABASE_ERROR');
+            throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage());
         }
     }
 
@@ -372,7 +372,7 @@ class Person
             return [(int)$id];
         } catch (Exception $e) {
             $this->db->rollback();
-            throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage(), 'https://api.example.com/docs/errors#DATABASE_ERROR');
+            throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage());
         }
     }
 
@@ -404,7 +404,7 @@ class Person
             return [(int)$id];
         } catch (Exception $e) {
             $this->db->rollback();
-            throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage(), 'https://api.example.com/docs/errors#DATABASE_ERROR');
+            throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage());
         }
     }
 
@@ -437,7 +437,7 @@ class Person
             return [(int)$id];
         } catch (Exception $e) {
             $this->db->rollback();
-            throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage(), 'https://api.example.com/docs/errors#DATABASE_ERROR');
+            throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage());
         }
     }
 }
