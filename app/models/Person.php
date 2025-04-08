@@ -141,47 +141,124 @@ class Person
         $sql = "DELETE FROM persons WHERE id = :id";
         $this->db->query($sql);
         $this->db->bind(':id', $id);
-        return $this->db->execute();
+        $this->db->execute();
+
+        if($this->db->rowCount() > 0){
+            return [];
+        } else {
+            throw new ApiException(404, 'NOT_FOUND', 'ID not found, nothing to delete');
+        }
     }
 
     /**
      * Creates a new person record.
      *
+     * This method inserts a new record into the persons table and, if provided in the $data array,
+     * also inserts related records into person_aliases, biographies, person_professions, and person_sources.
+     *
+     * Expected $data keys:
+     * - honorificPrefix (optional)
+     * - first_name (required)
+     * - nobility_particle (optional)
+     * - last_name (required)
+     * - religion (optional)
+     * - birth_city_id (optional)
+     * - death_city_id (optional)
+     * - date_of_birth (optional)
+     * - date_of_death (optional)
+     * - nationality (optional)
+     * - gender (optional)
+     * - biography (optional; requires 'lang' key as well)
+     * - lang (optional; required if biography is provided)
+     * - aliases (optional; an array of either strings or associative arrays with keys: 'name' and optionally 'type')
+     * - professions (optional; an array of profession keys)
+     * - sources (optional; an array of associative arrays with keys 'title' and 'url')
+     *
      * @param array $data The data for the new person.
      * @return array Returns an array containing the ID of the newly created person.
-     * @throws Exception If any database operation fails.
+     * @throws ApiException If any database operation fails.
      */
     public function createPerson(array $data): array
     {
-        $this->db->begin();
-
-        $sql = "INSERT INTO persons (honorificPrefix, first_name, nobility_particle, last_name, religion, 
-                    birth_city_id, death_city_id, date_of_birth, date_of_death, nationality, gender)
-                VALUES (:honorificPrefix, :first_name, :nobility_particle, :last_name, :religion, 
-                        :birth_city_id, :death_city_id, :date_of_birth, :date_of_death, :nationality, :gender)";
-        $this->db->query($sql);
-        $this->db->bind(':honorificPrefix', $data['honorificPrefix'] ?? null);
-        $this->db->bind(':first_name', $data['first_name']);
-        $this->db->bind(':nobility_particle', $data['nobility_particle'] ?? null);
-        $this->db->bind(':last_name', $data['last_name']);
-        $this->db->bind(':religion', $data['religion'] ?? null);
-        $this->db->bind(':birth_city_id', $data['birth_city_id'] ?? null);
-        $this->db->bind(':death_city_id', $data['death_city_id'] ?? null);
-        $this->db->bind(':date_of_birth', $data['date_of_birth'] ?? null);
-        $this->db->bind(':date_of_death', $data['date_of_death'] ?? null);
-        $this->db->bind(':nationality', $data['nationality'] ?? null);
-        $this->db->bind(':gender', $data['gender'] ?? null);
-        $this->db->execute();
-
-        // Get the last inserted ID
-        $newId = $this->db->dbh->lastInsertId();
-
-        // Optionally, insert data into related tables (aliases, biographies, professions, sources)
-        // ...
-
-        $this->db->commit();
-
-        return [(int)$newId];
+        try {
+            $this->db->begin();
+    
+            // Insert the base record in the persons table
+            $sql = "INSERT INTO persons (honorificPrefix, first_name, nobility_particle, last_name, religion, 
+                        birth_city_id, death_city_id, date_of_birth, date_of_death, nationality, gender)
+                    VALUES (:honorificPrefix, :first_name, :nobility_particle, :last_name, :religion, 
+                            :birth_city_id, :death_city_id, :date_of_birth, :date_of_death, :nationality, :gender)";
+            $this->db->query($sql);
+            $this->db->bind(':honorificPrefix', $data['honorificPrefix'] ?? null);
+            $this->db->bind(':first_name', $data['first_name']);
+            $this->db->bind(':nobility_particle', $data['nobility_particle'] ?? null);
+            $this->db->bind(':last_name', $data['last_name']);
+            $this->db->bind(':religion', $data['religion'] ?? null);
+            $this->db->bind(':birth_city_id', $data['birth_city_id'] ?? null);
+            $this->db->bind(':death_city_id', $data['death_city_id'] ?? null);
+            $this->db->bind(':date_of_birth', $data['date_of_birth'] ?? null);
+            $this->db->bind(':date_of_death', $data['date_of_death'] ?? null);
+            $this->db->bind(':nationality', $data['nationality'] ?? null);
+            $this->db->bind(':gender', $data['gender'] ?? null);
+            $this->db->execute();
+    
+            // Get the last inserted ID
+            $newId = $this->db->lastInsertId();
+    
+            // Insert aliases if provided
+            if (isset($data['aliases']) && is_array($data['aliases'])) {
+                foreach ($data['aliases'] as $alias) {
+                    $this->db->query("INSERT INTO person_aliases (person_id, name, type) VALUES (:id, :name, :type)");
+                    $this->db->bind(':id', $newId);
+                    // Check if alias is an array (with potential 'name' and 'type') or a string
+                    if (is_array($alias)) {
+                        $this->db->bind(':name', $alias['name']);
+                        $this->db->bind(':type', $alias['type'] ?? null);
+                    } else {
+                        $this->db->bind(':name', $alias);
+                        $this->db->bind(':type', null);
+                    }
+                    $this->db->execute();
+                }
+            }
+    
+            // Insert biography if provided (requires 'lang' to be present)
+            if (!empty($data['biography']) && isset($data['lang'])) {
+                $this->db->query("INSERT INTO biographies (person_id, lang, bio) VALUES (:id, :lang, :bio)");
+                $this->db->bind(':id', $newId);
+                $this->db->bind(':lang', $data['lang']);
+                $this->db->bind(':bio', $data['biography']);
+                $this->db->execute();
+            }
+    
+            // Insert professions if provided
+            if (isset($data['professions']) && is_array($data['professions'])) {
+                foreach ($data['professions'] as $profession) {
+                    $this->db->query("INSERT INTO person_professions (person_id, profession) VALUES (:id, :profession)");
+                    $this->db->bind(':id', $newId);
+                    $this->db->bind(':profession', $profession);
+                    $this->db->execute();
+                }
+            }
+    
+            // Insert sources if provided
+            if (isset($data['sources']) && is_array($data['sources'])) {
+                foreach ($data['sources'] as $source) {
+                    $this->db->query("INSERT INTO person_sources (person_id, title, url) VALUES (:id, :title, :url)");
+                    $this->db->bind(':id', $newId);
+                    $this->db->bind(':title', $source['title']);
+                    $this->db->bind(':url', $source['url']);
+                    $this->db->execute();
+                }
+            }
+    
+            $this->db->commit();
+    
+            return [(int)$newId];
+        } catch (Exception $e) {
+            $this->db->rollback();
+            throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage(), 'https://api.example.com/docs/errors#DATABASE_ERROR');
+        }
     }
 
     /**
