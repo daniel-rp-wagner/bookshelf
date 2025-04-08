@@ -4,8 +4,9 @@
  * Class App
  *
  * Front Controller for the REST API framework.
- * This class parses the request URL, matches it to the configured routes,
- * loads the appropriate controller, and invokes the corresponding action.
+ * This class is responsible for bootstrapping the application by parsing the URL,
+ * matching it against the defined routes, validating request parameters, and invoking
+ * the appropriate controller and action.
  */
 class App
 {
@@ -45,14 +46,42 @@ class App
     protected string $lang = 'de';
 
     /**
+     * The number of items per page.
+     *
+     * @var int
+     */
+    protected int $size = 0;
+
+    /**
+     * The current page number.
+     *
+     * @var int
+     */
+    protected int $page = 0;
+
+    /**
      * App constructor.
      *
-     * Initializes the application by parsing the URL, matching it against the route configuration,
-     * validating request parameters, and invoking the appropriate controller and action.
+     * Minimal initialization. The heavy bootstrapping logic has been moved to the start() method.
      *
      * @return void
      */
     public function __construct()
+    {
+        // You can perform additional minimal initialization here if needed.
+    }
+
+    /**
+     * Bootstraps the application.
+     *
+     * This method parses the URL, matches it with the defined routes,
+     * validates the request (e.g., authorization for non-GET requests), and invokes
+     * the corresponding controller action with the extracted parameters.
+     *
+     * @return void
+     * @throws ApiException if the route is not found or authorization fails.
+     */
+    public function start(): void
     {
         // Parse the URL into segments
         $urlSegments = $this->parseUrl();
@@ -64,7 +93,7 @@ class App
         require_once '../app/routes.php';
 
         // Retrieve the current HTTP request method
-        $this->method = $_SERVER['REQUEST_METHOD'];
+        $this->method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
         // Check authorization for write operations (non-GET requests)
         if ($this->method !== 'GET') {
@@ -72,15 +101,14 @@ class App
         }
 
         $matchedRoute = null;
-        
+
         // Iterate through each route configuration to find a match
         foreach ($routes as $routeInfo) {
             $regexPattern = $this->routeToPattern($routeInfo['route']);
-            if (preg_match_all($regexPattern, $requestedRoute, $matches) && $routeInfo['method'] === $this->method) {
+            if (preg_match_all($regexPattern, $requestedRoute, $matches) && strtoupper($routeInfo['method']) === strtoupper($this->method)) {
                 $matchedRoute = $routeInfo;
-
                 if (count($matches) > 1) {
-                    // The first captured group is the language code
+                    // The first captured group is assumed to be the language code
                     $this->lang = $matches[1][0];
                     // If an ID is captured, assign it as the resource ID
                     if (array_key_exists(2, $matches)) {
@@ -122,12 +150,9 @@ class App
      */
     private function parseUrl(): array
     {
-        // Check if the 'url' parameter is set in the GET request (.htaccess configurations will process the URL)
         if (isset($_GET['url'])) {
-            // Trim any trailing slashes from the URL, sanitize it, and split it into an array
             return explode('/', filter_var(rtrim($_GET['url'], '/'), FILTER_SANITIZE_URL));
         }
-        // Return an array with an empty string if 'url' parameter is not set 
         return [''];
     }
 
@@ -144,26 +169,21 @@ class App
         $regexPattern = str_replace('/', '\/', $route);
         $regexPattern = str_replace('{lang}', '([a-z]{2})', $regexPattern);
         $regexPattern = str_replace('{id}', '([0-9]+)', $regexPattern);
-        $regexPattern = "/^" . $regexPattern . "$/i";
-        return $regexPattern;
+        return "/^" . $regexPattern . "$/i";
     }
 
     /**
      * Checks authorization based on the "Authorization" header.
      *
-     * If the header is missing or contains an invalid value, a 401 Unauthorized status is returned
-     * and the script terminates.
+     * If the header is missing or contains an invalid value, throws an ApiException.
      *
      * @return void
+     * @throws ApiException if authorization fails.
      */
     private function checkAuthorization(): void
     {
-        // Retrieve all HTTP request headers
         $headers = getallheaders();
-        // Expect the header in the format "Bearer <token>"
         $authHeader = $headers['Authorization'] ?? '';
-
-        // For example, the expected token is "Bearer " followed by the secret defined in the SECRET constant.
         $expectedToken = 'Bearer ' . SECRET;
 
         if ($authHeader !== $expectedToken) {
