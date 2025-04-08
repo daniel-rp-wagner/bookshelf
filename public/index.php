@@ -31,3 +31,4 @@ set_exception_handler(function (Throwable $exception): void {
 
 // Create a new instance of the App class
 $app = new App();
+$app->start();
