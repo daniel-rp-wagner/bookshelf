@@ -60,4 +60,11 @@ $routes = [
     ['route' => 'api/{lang}/persons/{id}', 'method' => 'PUT', 'controller' => 'PersonController', 'action' => 'updatePerson'],
     // Delete a person by ID
     ['route' => 'api/{lang}/persons/{id}', 'method' => 'DELETE', 'controller' => 'PersonController', 'action' => 'deletePerson'],
+    // Update person aliases
+    ['route' => 'api/{lang}/persons/{id}/aliases', 'method' => 'PUT', 'controller' => 'PersonController', 'action' => 'updatePersonAlias'],
+    // Update person sources
+    ['route' => 'api/{lang}/persons/{id}/sources', 'method' => 'PUT', 'controller' => 'PersonController', 'action' => 'updatePersonSource'],
+    // Update person biography
+    ['route' => 'api/{lang}/persons/{id}/biographies', 'method' => 'PUT', 'controller' => 'PersonController', 'action' => 'updatePersonBiography'],
 ];
+
