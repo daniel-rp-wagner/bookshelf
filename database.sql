@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Erstellungszeit: 31. Mrz 2025 um 22:04
+-- Erstellungszeit: 11. Apr 2025 um 09:05
 -- Server-Version: 10.4.32-MariaDB
 -- PHP-Version: 8.2.12
 
@@ -211,7 +211,7 @@ CREATE TABLE `persons` (
 CREATE TABLE `person_aliases` (
   `person_id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
-  `type` varchar(255) NOT NULL COMMENT 'e.g. abbrevation, complete, birth name, alias, etc.',
+  `type` varchar(255) DEFAULT NULL COMMENT 'e.g. abbrevation, complete, birth name, alias, etc.',
   `lang` enum('de','en','fr','it','ru','es','nl','la') DEFAULT NULL COMMENT 'language code (ISO-639 Set 1)'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
@@ -235,7 +235,7 @@ CREATE TABLE `person_professions` (
 CREATE TABLE `person_sources` (
   `person_id` int(11) NOT NULL COMMENT 'foreign key from table persons',
   `title` varchar(255) DEFAULT NULL COMMENT 'display title',
-  `url` varchar(255) DEFAULT NULL COMMENT 'url to source'
+  `url` varchar(1024) DEFAULT NULL COMMENT 'url to source'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
