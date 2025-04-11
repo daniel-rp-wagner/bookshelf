@@ -107,7 +107,9 @@ class Person
 
         // Berufe (professions) abrufen – hier erfolgt ein Join zur i8n-Tabelle,
         // um den übersetzten Berufsnamen anhand des übergebenen Sprachcodes zu erhalten.
-        $this->db->query("SELECT i.translation AS profession 
+        $trans = $person['gender'] == 'M' ? 'i.translation' : 'i.translation_alt';
+
+        $this->db->query("SELECT " .$trans. " AS profession 
                         FROM person_professions pp 
                         JOIN i8n i ON pp.profession = i.variable 
                         WHERE pp.person_id = :id AND i.lang = :lang");
