@@ -66,5 +66,10 @@ $routes = [
     ['route' => 'api/{lang}/persons/{id}/sources', 'method' => 'PUT', 'controller' => 'PersonController', 'action' => 'updatePersonSource'],
     // Update person biography
     ['route' => 'api/{lang}/persons/{id}/biographies', 'method' => 'PUT', 'controller' => 'PersonController', 'action' => 'updatePersonBiography'],
+    // CRUD operations for series
+    ['route' => 'api/{lang}/series',      'method' => 'GET',    'controller' => 'SeriesController', 'action' => 'index'],
+    ['route' => 'api/{lang}/series',      'method' => 'POST',   'controller' => 'SeriesController', 'action' => 'createSeries'],
+    ['route' => 'api/{lang}/series/{id}', 'method' => 'GET',    'controller' => 'SeriesController', 'action' => 'seriesById'],
+    ['route' => 'api/{lang}/series/{id}', 'method' => 'PUT',    'controller' => 'SeriesController', 'action' => 'updateSeries'],
+    ['route' => 'api/{lang}/series/{id}', 'method' => 'DELETE', 'controller' => 'SeriesController', 'action' => 'deleteSeries'],
 ];
-

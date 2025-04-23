@@ -20,10 +20,12 @@ class PersonController extends Controller {
      * @return void
      */
     public function index($resourceId, string $lang, int $size, int $page): void {
+        $filterTag = $_GET['tag'] ?? '';
+
         $query = $this->pagination($size, $page);
 
         $personModel = $this->loadModel("Person");
-        $persons = $personModel->getAllPersons($lang, $query);
+        $persons = $personModel->getAllPersons($lang, $query, $filterTag);
 
         $this->outputData($persons);
     }

@@ -31,7 +31,7 @@ class Person
      * @param string $query SQL clause for pagination (e.g., LIMIT and OFFSET).
      * @return array List of persons.
      */
-    public function getAllPersons(string $lang, string $query = ''): array
+    public function getAllPersons(string $lang, string $query = '', string $filterTag = ''): array
     {
         $sql = "SELECT p.*,
                 COALESCE(cn_display_birth.name, cn_official_birth.name) AS birth_city_name,
@@ -48,11 +48,22 @@ class Person
                 AND cn_official_death.language_code = 'on'
             LEFT JOIN city_names cn_display_death 
                 ON cn_display_death.city_id = p.death_city_id 
-                AND cn_display_death.language_code = :lang" . $query;
+                AND cn_display_death.language_code = :lang WHERE 1=1";
+
+        if ($filterTag !== '') {
+            $sql .= " AND JSON_CONTAINS(p.tags, '\"{$filterTag}\"')";
+        }
+        $sql .= $query;
+
         $this->db->query($sql);
         $this->db->bind(':lang', $lang);
         $this->db->execute();
-        return $this->db->results();
+        $rows = $this->db->results();
+        // JSON‐decode für jede Zeile
+        return array_map(function($r){
+            $r['tags'] = json_decode($r['tags'], true) ?: [];
+            return $r;
+        }, $rows);
     }
 
     /**
@@ -90,6 +101,7 @@ class Person
         if (!$person) {
             throw new ApiException(404, 'NOT_FOUND', 'ID not found');
         }
+        $person['tags'] = json_decode($person['tags'] ?? '[]', true);
         
         // Biografie abrufen (je nach Sprache)
         $this->db->query("SELECT bio FROM biographies WHERE person_id = :id AND lang = :lang");
@@ -170,6 +182,7 @@ class Person
      * - date_of_death (optional)
      * - nationality (optional)
      * - gender (optional)
+     * - tags (optional)
      * - biography (optional; requires 'lang' key as well)
      * - lang (optional; required if biography is provided)
      * - aliases (optional; an array of either strings or associative arrays with keys: 'name' and optionally 'type')
@@ -187,9 +200,9 @@ class Person
     
             // Insert the base record in the persons table
             $sql = "INSERT INTO persons (honorificPrefix, first_name, nobility_particle, last_name, religion, 
-                        birth_city_id, death_city_id, date_of_birth, date_of_death, nationality, gender)
+                        birth_city_id, death_city_id, date_of_birth, date_of_death, nationality, gender, tags)
                     VALUES (:honorificPrefix, :first_name, :nobility_particle, :last_name, :religion, 
-                            :birth_city_id, :death_city_id, :date_of_birth, :date_of_death, :nationality, :gender)";
+                            :birth_city_id, :death_city_id, :date_of_birth, :date_of_death, :nationality, :gender, :tags)";
             $this->db->query($sql);
             $this->db->bind(':honorificPrefix', $data['honorificPrefix'] ?? null);
             $this->db->bind(':first_name', $data['first_name']);
@@ -202,6 +215,7 @@ class Person
             $this->db->bind(':date_of_death', $data['date_of_death'] ?? null);
             $this->db->bind(':nationality', $data['nationality'] ?? null);
             $this->db->bind(':gender', $data['gender'] ?? null);
+            $this->db->bind(':tags', $data['tags'] ?? null);
             $this->db->execute();
     
             // Get the last inserted ID
@@ -285,7 +299,8 @@ class Person
                     date_of_birth = :date_of_birth,
                     date_of_death = :date_of_death,
                     nationality = :nationality,
-                    gender = :gender
+                    gender = :gender,
+                    tags = :tags
                 WHERE id = :id";
         $this->db->query($sql);
         $this->db->bind(':honorificPrefix', $data['honorificPrefix'] ?? null);
@@ -299,6 +314,7 @@ class Person
         $this->db->bind(':date_of_death', $data['date_of_death'] ?? null);
         $this->db->bind(':nationality', $data['nationality'] ?? null);
         $this->db->bind(':gender', $data['gender'] ?? null);
+        $this->db->bind(':tags', $data['tags'] ?? null);
         $this->db->bind(':id', $data['id']);
         $this->db->execute();
 
