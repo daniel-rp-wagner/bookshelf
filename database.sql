@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Erstellungszeit: 11. Apr 2025 um 09:05
+-- Erstellungszeit: 23. Apr 2025 um 20:56
 -- Server-Version: 10.4.32-MariaDB
 -- PHP-Version: 8.2.12
 
@@ -199,7 +199,8 @@ CREATE TABLE `persons` (
   `date_of_birth` date DEFAULT NULL,
   `date_of_death` date DEFAULT NULL,
   `nationality` varchar(2) DEFAULT NULL,
-  `gender` enum('M','F') DEFAULT NULL
+  `gender` enum('M','F') DEFAULT NULL,
+  `tags` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`tags`))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 -- --------------------------------------------------------
@@ -236,6 +237,42 @@ CREATE TABLE `person_sources` (
   `person_id` int(11) NOT NULL COMMENT 'foreign key from table persons',
   `title` varchar(255) DEFAULT NULL COMMENT 'display title',
   `url` varchar(1024) DEFAULT NULL COMMENT 'url to source'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `series`
+--
+
+CREATE TABLE `series` (
+  `id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `subtitle` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `series_organization`
+--
+
+CREATE TABLE `series_organization` (
+  `series_id` int(11) NOT NULL,
+  `org_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `series_person`
+--
+
+CREATE TABLE `series_person` (
+  `series_id` int(11) NOT NULL,
+  `person_id` int(11) NOT NULL,
+  `role` enum('editor','compiler','other') NOT NULL DEFAULT 'editor'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -358,6 +395,26 @@ ALTER TABLE `person_sources`
   ADD KEY `idx_person_sources_org_id` (`person_id`);
 
 --
+-- Indizes für die Tabelle `series`
+--
+ALTER TABLE `series`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indizes für die Tabelle `series_organization`
+--
+ALTER TABLE `series_organization`
+  ADD PRIMARY KEY (`series_id`,`org_id`),
+  ADD KEY `org_id` (`org_id`);
+
+--
+-- Indizes für die Tabelle `series_person`
+--
+ALTER TABLE `series_person`
+  ADD PRIMARY KEY (`series_id`,`person_id`),
+  ADD KEY `person_id` (`person_id`);
+
+--
 -- AUTO_INCREMENT für exportierte Tabellen
 --
 
@@ -395,6 +452,12 @@ ALTER TABLE `organizations`
 -- AUTO_INCREMENT für Tabelle `persons`
 --
 ALTER TABLE `persons`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT für Tabelle `series`
+--
+ALTER TABLE `series`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -488,6 +551,20 @@ ALTER TABLE `person_professions`
 --
 ALTER TABLE `person_sources`
   ADD CONSTRAINT `person_sources_ibfk_1` FOREIGN KEY (`person_id`) REFERENCES `persons` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints der Tabelle `series_organization`
+--
+ALTER TABLE `series_organization`
+  ADD CONSTRAINT `series_organization_ibfk_1` FOREIGN KEY (`series_id`) REFERENCES `series` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `series_organization_ibfk_2` FOREIGN KEY (`org_id`) REFERENCES `organizations` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints der Tabelle `series_person`
+--
+ALTER TABLE `series_person`
+  ADD CONSTRAINT `series_person_ibfk_1` FOREIGN KEY (`series_id`) REFERENCES `series` (`id`),
+  ADD CONSTRAINT `series_person_ibfk_2` FOREIGN KEY (`person_id`) REFERENCES `persons` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
