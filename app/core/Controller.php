@@ -98,7 +98,7 @@ class Controller
 
         $tags = filter_input(INPUT_GET, 'tag', FILTER_VALIDATE_REGEXP, [
             'options' => [
-                'regexp'   => '/^[a-z]{1,100}$/',
+                'regexp'   => '/^[a-z0-9]{1,100}$/',
             ],
         ]);
         $tags = ($tags === false || $tags === null) ? '' : $tags;
