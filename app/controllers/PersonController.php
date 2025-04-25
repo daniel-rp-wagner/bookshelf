@@ -20,7 +20,8 @@ class PersonController extends Controller {
      * @return void
      */
     public function index($resourceId, string $lang, int $size, int $page): void {
-        $filterTag = $_GET['tag'] ?? '';
+        $params = $this->validateQueryParameters();
+        $filterTag = $params['tag'];
 
         $query = $this->pagination($size, $page);
 
