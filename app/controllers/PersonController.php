@@ -19,11 +19,10 @@ class PersonController extends Controller {
      * @param int $page The current page number.
      * @return void
      */
-    public function index($resourceId, string $lang): void {
-        $params = $this->validateQueryParameters();
-        $filterTag = $params['tag'];
+    public function index($resourceId, string $lang, int $size, int $page): void {
+        $filterTag = $_GET['tag'] ?? '';
 
-        $query = $this->pagination();
+        $query = $this->pagination($size, $page);
 
         $personModel = $this->loadModel("Person");
         $persons = $personModel->getAllPersons($lang, $query, $filterTag);

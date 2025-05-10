@@ -95,15 +95,8 @@ class Controller
             ],
         ]);
         $type = ($type === false || $type === null) ? '' : $type;
-
-        $tags = filter_input(INPUT_GET, 'tag', FILTER_VALIDATE_REGEXP, [
-            'options' => [
-                'regexp'   => '/^[a-z0-9]{1,100}$/',
-            ],
-        ]);
-        $tags = ($tags === false || $tags === null) ? '' : $tags;
-        
-        return ['size' => $size, 'page' => $page, 'country' => $country, 'city_id' => $city_id, 'type' => $type, 'tag' => $tags];
+    
+        return ['size' => $size, 'page' => $page, 'country' => $country, 'city_id' => $city_id, 'type' => $type, ];
     }
 
     /**
