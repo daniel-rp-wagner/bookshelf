@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Erstellungszeit: 23. Apr 2025 um 20:56
+-- Erstellungszeit: 10. Mai 2025 um 20:28
 -- Server-Version: 10.4.32-MariaDB
 -- PHP-Version: 8.2.12
 
@@ -242,6 +242,26 @@ CREATE TABLE `person_sources` (
 -- --------------------------------------------------------
 
 --
+-- Tabellenstruktur für Tabelle `publications`
+--
+
+CREATE TABLE `publications` (
+  `id` int(11) NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `subtitle` varchar(255) DEFAULT NULL,
+  `language` char(2) DEFAULT NULL,
+  `refs` varchar(255) DEFAULT NULL,
+  `summary` text DEFAULT NULL,
+  `series_id` int(11) DEFAULT NULL,
+  `series_note` varchar(255) DEFAULT NULL,
+  `sort_index` tinyint(4) DEFAULT NULL,
+  `category` varchar(255) DEFAULT NULL,
+  `tags` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Tabellenstruktur für Tabelle `series`
 --
 
@@ -273,6 +293,69 @@ CREATE TABLE `series_person` (
   `series_id` int(11) NOT NULL,
   `person_id` int(11) NOT NULL,
   `role` enum('editor','compiler','other') NOT NULL DEFAULT 'editor'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `volumes`
+--
+
+CREATE TABLE `volumes` (
+  `id` int(11) NOT NULL,
+  `publication_id` int(11) NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `subtitle` varchar(255) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `edition` varchar(50) DEFAULT NULL,
+  `year` smallint(6) DEFAULT NULL,
+  `pages` int(11) DEFAULT NULL,
+  `collation` varchar(255) DEFAULT NULL,
+  `volume_number` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `volume_persons`
+--
+
+CREATE TABLE `volume_persons` (
+  `volume_id` int(11) NOT NULL,
+  `person_id` int(11) NOT NULL,
+  `role` enum('author','contributor','editor','translator','illustrator','about','other') NOT NULL DEFAULT 'author'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `works`
+--
+
+CREATE TABLE `works` (
+  `id` int(11) NOT NULL,
+  `person_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `subtitle` varchar(255) DEFAULT NULL,
+  `lang` enum('de','en','fr','it','ru','es','nl','la') NOT NULL COMMENT 'language code (ISO-639 Set 1)',
+  `genre` varchar(100) DEFAULT NULL,
+  `year` year(4) DEFAULT NULL,
+  `medium` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `link` varchar(500) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `work_translations`
+--
+
+CREATE TABLE `work_translations` (
+  `id` int(11) NOT NULL,
+  `work_id` int(11) NOT NULL,
+  `lang` char(2) NOT NULL,
+  `title` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
@@ -395,6 +478,13 @@ ALTER TABLE `person_sources`
   ADD KEY `idx_person_sources_org_id` (`person_id`);
 
 --
+-- Indizes für die Tabelle `publications`
+--
+ALTER TABLE `publications`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `series_id` (`series_id`);
+
+--
 -- Indizes für die Tabelle `series`
 --
 ALTER TABLE `series`
@@ -413,6 +503,34 @@ ALTER TABLE `series_organization`
 ALTER TABLE `series_person`
   ADD PRIMARY KEY (`series_id`,`person_id`),
   ADD KEY `person_id` (`person_id`);
+
+--
+-- Indizes für die Tabelle `volumes`
+--
+ALTER TABLE `volumes`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `publication_id` (`publication_id`);
+
+--
+-- Indizes für die Tabelle `volume_persons`
+--
+ALTER TABLE `volume_persons`
+  ADD PRIMARY KEY (`person_id`,`volume_id`),
+  ADD KEY `volume_id` (`volume_id`);
+
+--
+-- Indizes für die Tabelle `works`
+--
+ALTER TABLE `works`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_works_person` (`person_id`);
+
+--
+-- Indizes für die Tabelle `work_translations`
+--
+ALTER TABLE `work_translations`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_translation_work` (`work_id`);
 
 --
 -- AUTO_INCREMENT für exportierte Tabellen
@@ -458,6 +576,18 @@ ALTER TABLE `persons`
 -- AUTO_INCREMENT für Tabelle `series`
 --
 ALTER TABLE `series`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT für Tabelle `works`
+--
+ALTER TABLE `works`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT für Tabelle `work_translations`
+--
+ALTER TABLE `work_translations`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -553,6 +683,12 @@ ALTER TABLE `person_sources`
   ADD CONSTRAINT `person_sources_ibfk_1` FOREIGN KEY (`person_id`) REFERENCES `persons` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints der Tabelle `publications`
+--
+ALTER TABLE `publications`
+  ADD CONSTRAINT `publications_ibfk_1` FOREIGN KEY (`series_id`) REFERENCES `series` (`id`);
+
+--
 -- Constraints der Tabelle `series_organization`
 --
 ALTER TABLE `series_organization`
@@ -565,6 +701,31 @@ ALTER TABLE `series_organization`
 ALTER TABLE `series_person`
   ADD CONSTRAINT `series_person_ibfk_1` FOREIGN KEY (`series_id`) REFERENCES `series` (`id`),
   ADD CONSTRAINT `series_person_ibfk_2` FOREIGN KEY (`person_id`) REFERENCES `persons` (`id`);
+
+--
+-- Constraints der Tabelle `volumes`
+--
+ALTER TABLE `volumes`
+  ADD CONSTRAINT `volumes_ibfk_1` FOREIGN KEY (`publication_id`) REFERENCES `publications` (`id`);
+
+--
+-- Constraints der Tabelle `volume_persons`
+--
+ALTER TABLE `volume_persons`
+  ADD CONSTRAINT `volume_persons_ibfk_1` FOREIGN KEY (`person_id`) REFERENCES `persons` (`id`),
+  ADD CONSTRAINT `volume_persons_ibfk_2` FOREIGN KEY (`volume_id`) REFERENCES `volumes` (`id`);
+
+--
+-- Constraints der Tabelle `works`
+--
+ALTER TABLE `works`
+  ADD CONSTRAINT `fk_works_person` FOREIGN KEY (`person_id`) REFERENCES `persons` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints der Tabelle `work_translations`
+--
+ALTER TABLE `work_translations`
+  ADD CONSTRAINT `fk_translation_work` FOREIGN KEY (`work_id`) REFERENCES `works` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
