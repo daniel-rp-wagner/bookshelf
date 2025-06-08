@@ -140,6 +140,16 @@ class Person
         $this->db->execute();
         $person['sources'] = $this->db->results();
 
+        // Werke laden
+        $this->db->query("
+            SELECT *
+              FROM works w
+             WHERE w.person_id = :id
+        ");
+        $this->db->bind(':id', $id);
+        $this->db->execute();
+        $person['works'] = $this->db->results();
+
         return $person;
     }
 
@@ -453,6 +463,35 @@ class Person
             }
             $this->db->commit();
             return [(int)$id];
+        } catch (Exception $e) {
+            $this->db->rollback();
+            throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage());
+        }
+    }
+
+    /**
+     * Creates a new work for a person.
+     *
+     * @param int   $personId
+     * @param array $data ['title'=>string, 'year'=>int|null]
+     * @return int Newly created work ID
+     * @throws ApiException on failure
+     */
+    public function createPersonWork(int $personId, array $data): int
+    {
+        try {
+            $this->db->begin();
+            $this->db->query("
+                INSERT INTO works (person_id, title, year)
+                VALUES (:person_id, :title, :year)
+            ");
+            $this->db->bind(':person_id', $personId);
+            $this->db->bind(':title',      $data['title']);
+            $this->db->bind(':year',       $data['year'] ?? null);
+            $this->db->execute();
+
+            $this->db->commit();
+            return [$personId];
         } catch (Exception $e) {
             $this->db->rollback();
             throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage());

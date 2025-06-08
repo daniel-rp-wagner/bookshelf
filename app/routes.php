@@ -66,6 +66,8 @@ $routes = [
     ['route' => 'api/{lang}/persons/{id}/sources', 'method' => 'PUT', 'controller' => 'PersonController', 'action' => 'updatePersonSource'],
     // Update person biography
     ['route' => 'api/{lang}/persons/{id}/biographies', 'method' => 'PUT', 'controller' => 'PersonController', 'action' => 'updatePersonBiography'],
+    // unter den Person-Routen ergänzen:
+    ['route' => 'api/{lang}/persons/{id}/works', 'method' => 'POST', 'controller' => 'PersonController', 'action' => 'createPersonWork'],
     // CRUD operations for series
     ['route' => 'api/{lang}/series',      'method' => 'GET',    'controller' => 'SeriesController', 'action' => 'index'],
     ['route' => 'api/{lang}/series',      'method' => 'POST',   'controller' => 'SeriesController', 'action' => 'createSeries'],

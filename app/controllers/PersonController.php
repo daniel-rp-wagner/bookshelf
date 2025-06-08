@@ -178,4 +178,21 @@ class PersonController extends Controller {
         $result = $personModel->updatePersonBiography($resourceId, $lang, $biography);
         $this->outputData($result);
     }
+
+    /**
+     * POST /persons/{id}/works
+     *
+     * @param int    $resourceId Person ID
+     * @param string $lang       Language code (unused here, aber im Routing-Pattern)
+     * @return void
+     */
+    public function createPersonWork(int $resourceId, string $lang): void
+    {
+        $payload  = json_decode(file_get_contents('php://input'), true);
+        
+        $model    = $this->loadModel('Person');
+        $result = $model->createPersonWork($resourceId, $payload);
+
+        $this->outputData([$result]);
+    }
 }
