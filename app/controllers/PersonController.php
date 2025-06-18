@@ -180,6 +180,21 @@ class PersonController extends Controller {
     }
 
     /**
+     * GET /persons/{id}/works
+     *
+     * @param int    $resourceId Person ID
+     * @param string $lang       Language code (unused here, aber im Routing-Pattern)
+     * @return void
+     */
+    public function getPersonWork(int $resourceId, string $lang): void
+    {        
+        $model    = $this->loadModel('Person');
+        $result = $model->getPersonWork($resourceId);
+
+        $this->outputData($result);
+    }
+
+    /**
      * POST /persons/{id}/works
      *
      * @param int    $resourceId Person ID

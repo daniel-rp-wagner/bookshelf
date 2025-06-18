@@ -140,16 +140,6 @@ class Person
         $this->db->execute();
         $person['sources'] = $this->db->results();
 
-        // Werke laden
-        $this->db->query("
-            SELECT *
-              FROM works w
-             WHERE w.person_id = :id
-        ");
-        $this->db->bind(':id', $id);
-        $this->db->execute();
-        $person['works'] = $this->db->results();
-
         return $person;
     }
 
@@ -467,6 +457,85 @@ class Person
             $this->db->rollback();
             throw new ApiException(500, 'DATABASE_ERROR', $e->getMessage());
         }
+    }
+
+    public function getPersonWork(int $personId): array
+    {
+// in deinem Model, z.B. Person::getPersonWorks()
+
+$this->db->query('
+    SELECT
+      w.id,
+      w.person_id,
+      w.title,
+      w.subtitle,
+      w.lang,
+      w.genre,
+      w.year,
+      w.medium,
+      p.id           AS parent_id,
+      p.title        AS parent_title,
+
+      /* Children JSON */
+      IF(
+        COUNT(c.id)=0,
+        \'[]\',
+        CONCAT(
+          \'[\',
+          GROUP_CONCAT(
+            CONCAT(
+              \'{"id":\',    c.id,
+              \',"title":"\', REPLACE(c.title, \'"\' , \'\\\"\'),
+              \'"}\'
+            )
+            ORDER BY c.id SEPARATOR \',\'
+          ),
+          \']\'
+        )
+      ) AS children,
+
+      /* Translations JSON */
+      IF(
+        COUNT(wt.id)=0,
+        \'[]\',
+        CONCAT(
+          \'[\',
+          GROUP_CONCAT(
+            CONCAT(
+              \'{"lang":"\', wt.lang,
+              \'","title":"\', REPLACE(wt.title, \'"\' , \'\\\"\'),
+              \'"}\'
+            )
+            ORDER BY wt.lang SEPARATOR \',\'
+          ),
+          \']\'
+        )
+      ) AS translations
+
+    FROM works AS w
+    LEFT JOIN works AS p ON p.id = w.medium
+    LEFT JOIN works AS c ON c.medium = w.id
+    LEFT JOIN work_translations AS wt ON wt.work_id = w.id
+
+    WHERE w.person_id = :id
+
+    GROUP BY
+      w.id, w.person_id, w.title, w.subtitle, w.lang, w.genre, w.year, w.medium,
+      p.id, p.title
+');
+
+$this->db->bind(':id', $personId);
+$this->db->execute();
+
+$works = $this->db->results();
+
+// jetzt children und translations aus dem JSON-String in echte Arrays konvertieren
+foreach ($works as &$w) {
+    $w['children']     = json_decode($w['children'],     true);
+    $w['translations'] = json_decode($w['translations'], true);
+}
+
+return $works;
     }
 
     /**

@@ -67,6 +67,8 @@ $routes = [
     // Update person biography
     ['route' => 'api/{lang}/persons/{id}/biographies', 'method' => 'PUT', 'controller' => 'PersonController', 'action' => 'updatePersonBiography'],
     // unter den Person-Routen ergänzen:
+    ['route' => 'api/{lang}/persons/{id}/works', 'method' => 'GET', 'controller' => 'PersonController', 'action' => 'getPersonWork'],
+    // unter den Person-Routen ergänzen:
     ['route' => 'api/{lang}/persons/{id}/works', 'method' => 'POST', 'controller' => 'PersonController', 'action' => 'createPersonWork'],
     // CRUD operations for series
     ['route' => 'api/{lang}/series',      'method' => 'GET',    'controller' => 'SeriesController', 'action' => 'index'],
@@ -74,4 +76,10 @@ $routes = [
     ['route' => 'api/{lang}/series/{id}', 'method' => 'GET',    'controller' => 'SeriesController', 'action' => 'seriesById'],
     ['route' => 'api/{lang}/series/{id}', 'method' => 'PUT',    'controller' => 'SeriesController', 'action' => 'updateSeries'],
     ['route' => 'api/{lang}/series/{id}', 'method' => 'DELETE', 'controller' => 'SeriesController', 'action' => 'deleteSeries'],
+
+    ['route' => 'api/{lang}/publications',      'method' => 'GET',    'controller' => 'PublicationsController', 'action' => 'index'],
+    ['route' => 'api/{lang}/publications',      'method' => 'POST',   'controller' => 'PublicationsController', 'action' => 'createPublication'],
+    ['route' => 'api/{lang}/publications/{id}', 'method' => 'GET',    'controller' => 'PublicationsController', 'action' => 'publicationById'],
+    ['route' => 'api/{lang}/publications/{id}', 'method' => 'PUT',    'controller' => 'PublicationsController', 'action' => 'updatePublication'],
+    ['route' => 'api/{lang}/publications/{id}', 'method' => 'DELETE', 'controller' => 'PublicationsController', 'action' => 'deletePublication'],
 ];

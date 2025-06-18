@@ -101,7 +101,7 @@ class App
         }
 
         $matchedRoute = null;
-
+        
         // Iterate through each route configuration to find a match
         foreach ($routes as $routeInfo) {
             $regexPattern = $this->routeToPattern($routeInfo['route']);
