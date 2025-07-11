@@ -1,0 +1,11 @@
+RewriteEngine On
+
+# RewriteBase anpassen, wenn du nicht im Root arbeitest, z. B. /meinprojekt/
+RewriteBase /
+
+# Falls eine Datei oder ein Verzeichnis existiert, kein Rewrite
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Alles andere an index.php weiterleiten
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]

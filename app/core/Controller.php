@@ -82,7 +82,7 @@ class Controller
         ]);
         $country = ($country === false || $country === null) ? '' : $country;
     
-        $city_id = filter_input(INPUT_GET, 'city', FILTER_VALIDATE_REGEXP, [
+        $city_id = filter_input(INPUT_GET, 'city_id', FILTER_VALIDATE_REGEXP, [
             'options' => [
                 'regexp'   => '/^[0-9]+$/',
             ],
